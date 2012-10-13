@@ -284,7 +284,7 @@ package org.flexlite.domUtils
 		 * 搜索指定文件夹及其子文件夹下所有的文件
 		 * @param dir 要搜索的文件夹
 		 * @param extension 要搜索的文件扩展名，例如："png"。不设置表示获取所有类型文件。注意：若设置了filterFunc，则忽略此参数。
-		 * @param filterFunc 过滤函数：filterFunc(file:File):Boolean,返回true则加入结果列表。
+		 * @param filterFunc 过滤函数：filterFunc(file:File):Boolean,参数为遍历过程中的每一个文件夹或文件，返回true则加入结果列表或继续向下查找。
 		 */		
 		public static function search(dir:String,extension:String=null,filterFunc:Function=null):Array
 		{
@@ -306,7 +306,17 @@ package org.flexlite.domUtils
 			{
 				if(file.isDirectory)
 				{
-					findFiles(file,result,extension,filterFunc);
+					if(filterFunc!=null)
+					{
+						if(filterFunc(file))
+						{
+							findFiles(file,result,extension,filterFunc);
+						}
+					}
+					else
+					{
+						findFiles(file,result,extension,filterFunc);
+					}
 				}
 				else if(filterFunc!=null)
 				{
