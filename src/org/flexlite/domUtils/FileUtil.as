@@ -70,6 +70,21 @@ package org.flexlite.domUtils
 			return fs;
 		}
 		/**
+		 * 打开文件字节流的简便方法,返回打开的字节流数据，若失败，返回null.
+		 * @param path 要打开的文件路径
+		 */
+		public static function openAsByteArray(path:String):ByteArray
+		{
+			var fs:FileStream = open(path);
+			if(!fs)
+				return null;
+			fs.position = 0;
+			var bytes:ByteArray = new ByteArray();
+			fs.readBytes(bytes);
+			fs.close();
+			return bytes;
+		}
+		/**
 		 * 打开文本文件的简便方法,返回打开文本的内容，若失败，返回"".
 		 * @param path 要打开的文件路径
 		 */	
@@ -345,22 +360,6 @@ package org.flexlite.domUtils
 		public static function url2Path(url:String):String
 		{
 			return File.applicationDirectory.resolvePath(url).nativePath;
-		}
-		/**
-		 * 检查指定的文件或文件夹是否存在
-		 */		
-		public static function exists(path:String):Boolean
-		{
-			try
-			{
-				var file:File = new File(path);
-				return file.exists;
-			}
-			catch(e:Error)
-			{
-				return false;
-			}
-			return false;
 		}
 	}
 }
