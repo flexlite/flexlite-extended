@@ -38,21 +38,7 @@ package org.flexlite.domUtils
 		public static function replaceStr(targetStr:String,p:String,rep:String):String
 		{
 			var arr:Array = targetStr.split(p);
-			var returnStr:String = "";
-			var isFirst:Boolean = true;
-			for each(var str:String in arr)
-			{
-				if(isFirst)
-				{
-					returnStr = str;
-					isFirst = false;
-				}
-				else
-				{
-					returnStr += rep+str;
-				}
-			}
-			return returnStr;
+			return arr.join(rep);
 		}
 		/**
 		 * 将颜色数字代码转换为字符串。
