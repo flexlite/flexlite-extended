@@ -1,16 +1,16 @@
-package org.flexlite.domDll.fileLib
+package org.flexlite.domDll.loaders
 {
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.utils.ByteArray;
 	
 	/**
-	 * JSON文件解析缓存库
+	 * JSON文件加载器
 	 * @author DOM
 	 */
-	public class JsonFileLib extends FileLibBase
+	public class JsonResLoader extends ResLoaderBase
 	{
-		public function JsonFileLib()
+		public function JsonResLoader()
 		{
 			super();
 		}
