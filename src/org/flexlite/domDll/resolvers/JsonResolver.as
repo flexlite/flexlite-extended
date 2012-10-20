@@ -1,4 +1,4 @@
-package org.flexlite.domDll.loaders
+package org.flexlite.domDll.resolvers
 {
 	import com.adobe.serialization.json.JSON;
 	
@@ -8,9 +8,9 @@ package org.flexlite.domDll.loaders
 	 * JSON文件加载器
 	 * @author DOM
 	 */
-	public class JsonResLoader extends ResLoaderBase
+	public class JsonResolver extends ResolverBase
 	{
-		public function JsonResLoader()
+		public function JsonResolver()
 		{
 			super();
 		}
