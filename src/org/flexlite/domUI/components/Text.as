@@ -26,15 +26,15 @@ package org.flexlite.domUI.components
 	
 	
 	/**
-	 * 一行或多行不可编辑的文本控件
+	 * 一行或多行不可编辑的文本控件,基于FTE。
 	 * @author DOM
 	 */	
-	public class Label extends UIComponent implements IDisplayText
+	public class Text extends UIComponent implements IDisplayText
 	{
 		/**
 		 * 构造函数
 		 */		
-		public function Label()
+		public function Text()
 		{
 			super();
 			mouseChildren = false;
