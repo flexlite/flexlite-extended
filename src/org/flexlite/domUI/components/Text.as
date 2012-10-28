@@ -346,19 +346,19 @@ package org.flexlite.domUI.components
 			invalidateFormat();
 		}
 		
-		private var _leading:int = 2;
+		private var _lineHeight:Object = "120%";
 		/**
-		 * 行距,默认值为2。
+		 * 行高。可以使用百分比字符串或者Number,默认值：120%。
 		 */
-		public function get leading():int
+		public function get lineHeight():Object
 		{
-			return _leading;
+			return _lineHeight;
 		}
-		public function set leading(value:int):void
+		public function set lineHeight(value:Object):void
 		{
-			if(_leading==value)
+			if(_lineHeight==value)
 				return;
-			_leading = value;
+			_lineHeight = value;
 			invalidateFormat();
 		}
 		
@@ -860,7 +860,20 @@ package org.flexlite.domUI.components
 			}
 			
 			var fontSize:Number = staticTextElement.elementFormat.fontSize;
-			var actualLineHeight:Number = fontSize+_leading;
+			var actualLineHeight:Number;
+			if (_lineHeight is Number)
+			{
+				actualLineHeight = Number(_lineHeight);
+			}
+			else if (_lineHeight is String)
+			{
+				var len:int = _lineHeight.length;
+				var percent:Number =
+					Number(String(_lineHeight).substring(0, len - 1));
+				actualLineHeight = percent / 100 * fontSize;
+			}
+			if (isNaN(actualLineHeight))
+				actualLineHeight = 1.2 * fontSize;
 			
 			var maxTextWidth:Number = 0;
 			var totalTextHeight:Number = 0;
