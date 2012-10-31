@@ -127,7 +127,7 @@ package org.flexlite.domCompile.compiler
 			var config:XML = getConfigNode(node);
 			if(config!=null)
 				packageName = config.@p;
-			if(packageName!="")
+			if(packageName!=""&&packageName.indexOf(".")!=-1)
 			{
 				currentClass.addImport(packageName);
 			}
@@ -920,7 +920,7 @@ package org.flexlite.domCompile.compiler
 				currentClass.addVariable(new CpVariable(id+"_"+key,Modifiers.M_PRIVATE,"Class","",true,false,metadata));
 				value = id+"_"+key; 
 			}
-			else if(key=="skinClass"||key=="skinName"||key=="itemRenderer")
+			else if(key=="skinClass"||key=="skinName"||key=="itemRenderer"||key=="itemRendererSkinName")
 			{
 				if(isPackageName(value))
 				{
