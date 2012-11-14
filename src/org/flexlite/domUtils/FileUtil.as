@@ -288,7 +288,7 @@ package org.flexlite.domUtils
 			if(path==null||path=="")
 				return "";
 			var startIndex:int = path.lastIndexOf("/");
-			startIndex = Math.max(path.lastIndexOf("\\"));
+			startIndex = Math.max(path.lastIndexOf("\\"),startIndex);
 			var endIndex:int = path.lastIndexOf(".");
 			if(endIndex==-1)
 				endIndex = path.length;
