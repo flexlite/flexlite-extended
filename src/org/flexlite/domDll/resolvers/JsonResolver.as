@@ -22,11 +22,6 @@ package org.flexlite.domDll.resolvers
 			var bytes:ByteArray = fileDic[key];
 			if(!bytes)
 				return null;
-			try
-			{
-				bytes.uncompress();
-			}
-			catch(e:Error){}
 			bytes.position = 0;
 			var resultStr:String = bytes.readUTFBytes(bytes.length);
 			var data:Object;
