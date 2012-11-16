@@ -269,16 +269,15 @@ package org.flexlite.domUtils
 		 */		
 		public static function getDirectory(path:String):String
 		{
-			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
-			if(file.isDirectory)
-				return file.nativePath+File.separator;
-			path = file.nativePath;
+			var endIndex:int = path.lastIndexOf("/");
+			endIndex = Math.max(path.lastIndexOf("\\"),endIndex);
+			var fileIndex:int = path.lastIndexOf(".");
 			var index:int = path.lastIndexOf(File.separator);
-			if(index==-1)
+			if(endIndex==-1)
 			{
-				return "";
+				return fileIndex==-1?path:"";
 			}
-			return path.substr(0,index+1);
+			return path.substr(0,endIndex+1);
 		}
 		/**
 		 * 获取路径的文件名(不含扩展名)或文件夹名
