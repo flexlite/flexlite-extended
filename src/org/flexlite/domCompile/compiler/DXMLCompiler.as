@@ -719,29 +719,11 @@ package org.flexlite.domCompile.compiler
 		{
 			var packageName:String = getPackageByNode(node);
 			var className:String = node.localName();
-			if(className!="Array"&&(isProperty(node)||packageName==""))
+			var isBasicType:Boolean = isBasicTypeData(className);
+			if(!isBasicType&&(isProperty(node)||packageName==""))
 				return "";
-			
-			if(className=="Array")
-			{//如果子节点是数组类型
-				var returnValue:String = "[";
-				var isFirst:Boolean = true;
-				for each(var child:XML in node.children())
-				{
-					if(isFirst)
-					{
-						isFirst = false;
-						returnValue += createFuncForNode(child);
-					}
-					else
-					{
-						returnValue += ","+createFuncForNode(child);
-					}
-					
-				}
-				returnValue += "]";
-				return returnValue;
-			}
+			if(isBasicType)
+				return createBasicTypeForNode(node);
 			var func:CpFunction = new CpFunction;
 			var tailName:String = "_i";
 			func.name = node.@id+tailName;
@@ -781,6 +763,49 @@ package org.flexlite.domCompile.compiler
 			func.codeBlock = cb;
 			currentClass.addFunction(func);
 			return func.name+"()";
+		}
+		
+		private var basicTypes:Vector.<String> = 
+			new <String>["Array","uint","int","Boolean","String","Number"];
+		/**
+		 * 检查目标类名是否是基本数据类型
+		 */		
+		private function isBasicTypeData(className:String):Boolean
+		{
+			for each(var type:String in basicTypes)
+			{
+				if(type==className)
+					return true;
+			}
+			return false;
+		}
+		/**
+		 * 为指定基本数据类型节点实例化,返回实例化后的值。
+		 */		
+		private function createBasicTypeForNode(node:XML):String
+		{
+			var className:String = node.localName();
+			var returnValue:String = "";
+			var child:XML;
+			switch(className)
+			{
+				case "Array":
+					var values:Array = [];
+					for each(child in node.children())
+					{
+						values.push(createFuncForNode(child));
+					}
+					returnValue = "["+values.join(",")+"]";
+					break;
+				case "uint":
+				case "int":
+				case "Boolean":
+				case "String":
+				case "Number":
+					returnValue = node.toString();
+					break;
+			}
+			return returnValue;
 		}
 		/**
 		 * 将节点属性赋值语句添加到代码块
@@ -838,7 +863,7 @@ package org.flexlite.domCompile.compiler
 				}
 				if(directChild.length==0)
 					return;
-				if(isArray)
+				if(isArray&&(directChild.length>1||directChild[0].localName()!="Array"))
 				{
 					var arrValue:String = "[";
 					var isFirst:Boolean = true;
@@ -877,6 +902,8 @@ package org.flexlite.domCompile.compiler
 			var name:String = node.localName();
 			if(name==null)
 				return true;
+			if(name=="int"||name=="uint")
+				return false;
 			var firstChar:String = name.charAt(0);
 			return firstChar<"A"||firstChar>"Z";
 		}
