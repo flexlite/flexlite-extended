@@ -706,6 +706,13 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private function createVarForNode(node:XML):void
 		{
+			var className:String = node.localName();
+			if(isBasicTypeData(className))
+			{
+				if(!currentClass.containsVar(node.@id))
+					currentClass.addVariable(new CpVariable(node.@id,Modifiers.M_PUBLIC,className));
+				return;
+			}
 			var packageName:String = getPackageByNode(node);
 			if(packageName=="")
 				return;
@@ -766,7 +773,7 @@ package org.flexlite.domCompile.compiler
 		}
 		
 		private var basicTypes:Vector.<String> = 
-			new <String>["Array","uint","int","Boolean","String","Number","Class"];
+			new <String>["Array","uint","int","Boolean","String","Number","Class","Vector"];
 		/**
 		 * 检查目标类名是否是基本数据类型
 		 */		
@@ -787,25 +794,35 @@ package org.flexlite.domCompile.compiler
 			var className:String = node.localName();
 			var returnValue:String = "";
 			var child:XML;
+			var varItem:CpVariable = currentClass.getVariableByName(node.@id);
 			switch(className)
 			{
 				case "Array":
+				case "Vector":
 					var values:Array = [];
 					for each(child in node.children())
 					{
 						values.push(createFuncForNode(child));
 					}
 					returnValue = "["+values.join(",")+"]";
+					if(className=="Vector")
+					{
+						returnValue = "new <"+node.@type+">"+returnValue;
+					}
 					break;
 				case "uint":
 				case "int":
 				case "Boolean":
-				case "String":
 				case "Number":
 				case "Class":
 					returnValue = node.toString();
 					break;
+				case "String":
+					returnValue = formatString(node.toString());
+					break;
 			}
+			if(varItem)
+				varItem.defaultValue = returnValue;
 			return returnValue;
 		}
 		/**

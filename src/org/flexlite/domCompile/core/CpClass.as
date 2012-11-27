@@ -143,6 +143,20 @@ package org.flexlite.domCompile.core
 			variableBlock.push(variableItem);
 		}
 		/**
+		 * 根据变量名获取变量定义
+		 */		
+		public function getVariableByName(name:String):CpVariable
+		{
+			for each(var item:CpVariable in variableBlock)
+			{
+				if(item.name==name)
+				{
+					return item;
+				}
+			}
+			return null;
+		}
+		/**
 		 * 是否包含指定名称的变量
 		 */		
 		public function containsVar(name:String):Boolean
