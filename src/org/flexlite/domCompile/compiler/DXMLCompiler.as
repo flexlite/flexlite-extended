@@ -766,7 +766,7 @@ package org.flexlite.domCompile.compiler
 		}
 		
 		private var basicTypes:Vector.<String> = 
-			new <String>["Array","uint","int","Boolean","String","Number"];
+			new <String>["Array","uint","int","Boolean","String","Number","Class"];
 		/**
 		 * 检查目标类名是否是基本数据类型
 		 */		
@@ -802,6 +802,7 @@ package org.flexlite.domCompile.compiler
 				case "Boolean":
 				case "String":
 				case "Number":
+				case "Class":
 					returnValue = node.toString();
 					break;
 			}
