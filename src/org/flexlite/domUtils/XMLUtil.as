@@ -11,7 +11,8 @@ package org.flexlite.domUtils
 		 * 获取node在xmlStr中的对应文本区域的起始和结束索引
 		 * @param xmlStr xml的文本
 		 * @param node 要定位的xml子节点
-		 * @return 一个数组，[起始索引,子项起始索引,子项结束索引,结束索引]
+		 * @return 一个数组，[headStart(头结点起始索引),headEnd(头结点结束索引),
+		 * tailStart(尾结点起始索引),tailEnd(尾结点结束索引)]
 		 */		
 		public static function getIndexOfXMLString(xmlStr:String,node:XML):Array
 		{
@@ -45,10 +46,12 @@ package org.flexlite.domUtils
 			var closed:Boolean = true;
 			var nodeText:String = "";
 			var openNum:int = 0;
-			var startIndex:int = -1;
-			var childStartIndex:int = -1;
-			var childEndIndex:int = -1;
-			var endIndex:int = -1;
+			
+			var headStart:int = -1;
+			var headEnd:int = -1;
+			var tailStart:int = -1;
+			var tailEnd:int = -1;
+			
 			while(xmlStr.length>0)
 			{
 				if(closed)
@@ -66,6 +69,11 @@ package org.flexlite.domUtils
 					if(xmlStr.substr(0,4)=="<!--")
 					{
 						index = xmlStr.indexOf("-->")+2;
+						isNote = true;
+					}
+					if(xmlStr.substr(0,9)=="<![CDATA[")
+					{
+						index = xmlStr.indexOf("]]>")+2;
 						isNote = true;
 					}
 					else
@@ -107,27 +115,27 @@ package org.flexlite.domUtils
 					}
 					if(path.length==0)
 					{
-						if(startIndex==-1)
+						if(headStart==-1)
 						{
-							startIndex = subLength-nodeText.length;
-							childStartIndex = subLength;
+							headStart = subLength-nodeText.length;
+							headEnd = subLength;
 							if(type==1)
 							{
-								endIndex = childEndIndex = subLength;
+								tailEnd = tailStart = subLength;
 								break;
 							}
 						}
 						else if(openNum==-1)
 						{
-							childEndIndex = subLength-nodeText.length;
-							endIndex = subLength;
+							tailStart = subLength-nodeText.length;
+							tailEnd = subLength;
 							break;
 						}
 					}
 				}
 			}
 			
-			return [startIndex,childStartIndex,childEndIndex,endIndex];
+			return [headStart,headEnd,tailStart,tailEnd];
 		}
 		
 		/**
