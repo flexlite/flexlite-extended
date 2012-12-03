@@ -70,16 +70,22 @@ package org.flexlite.domUtils
 				}
 				if(length>1048576)
 				{
+					if(sizeStr)
+						sizeStr += ",";
 					sizeStr += int(length/1048576).toString()+"MB";
 					length = length%1048576;
 				}
 				if(length>1204)
 				{
+					if(sizeStr)
+						sizeStr += ",";
 					sizeStr += int(length/1204).toString()+"KB";
 					length = length%1204;
 				}
 				if(length>0)
 				{
+					if(sizeStr)
+						sizeStr += ",";
 					sizeStr += length.toString()+"B";
 				}
 			}
