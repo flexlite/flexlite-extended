@@ -265,17 +265,15 @@ package org.flexlite.domUtils
 		}
 		
 		/**
-		 * 返回指定文件的父级文件夹路径，若自身已是文件夹则直接返回。返回字符串的结尾已包含分隔符。
+		 * 返回指定文件的父级文件夹路径,返回字符串的结尾已包含分隔符。
 		 */		
 		public static function getDirectory(path:String):String
 		{
 			var endIndex:int = path.lastIndexOf("/");
 			endIndex = Math.max(path.lastIndexOf("\\"),endIndex);
-			var fileIndex:int = path.lastIndexOf(".");
-			var index:int = path.lastIndexOf(File.separator);
 			if(endIndex==-1)
 			{
-				return fileIndex==-1?path:"";
+				return "";
 			}
 			return path.substr(0,endIndex+1);
 		}
