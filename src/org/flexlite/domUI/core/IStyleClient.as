@@ -1,7 +1,5 @@
 package org.flexlite.domUI.core
 {
-	import flash.utils.Dictionary;
-
 	/**
 	 * 支持样式绑定的组件接口
 	 * @author DOM
