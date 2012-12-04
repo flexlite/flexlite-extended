@@ -14,27 +14,30 @@ package org.flexlite.domDisplay.utils
 	public class DxrUtil
 	{
 		/**
-		 * 从Dxr文件中移除指定的键值列表
+		 * 从Dxr文件中移除指定的键值列表,若要删除的文件已经不存在key，则不保存新文件。
 		 * @param dxrPath dxr文件路径
 		 * @param keys 要移除的键值列表
 		 * @param newPath 修改完成后存储的路径，不设置则覆盖源文件。
 		 * @return 是否移除成功
 		 */		
-		public static function remove(dxrPath:String,keys:Array,newPath:String=""):Boolean
+		public static function remove(dxrPath:String,keys:Array,newPath:String=""):void
 		{
 			var bytes:ByteArray = FileUtil.openAsByteArray(dxrPath);
 			if(!bytes)
-				return false;
+				return;
 			bytes = removeFromBytes(bytes,keys);
 			if(!bytes)
-				return false;
+			{
+				if(!newPath)
+					FileUtil.deletePath(dxrPath);
+				return;
+			}
 			if(!newPath)
 				newPath = dxrPath;
 			FileUtil.save(dxrPath,bytes);
-			return true;
 		}
 		/**
-		 * 为Dxr文件字节流移除指定的键值列表，返回修改后的文件字节流
+		 * 为Dxr文件字节流移除指定的键值列表，返回修改后的文件字节流,若已经不存在key则返回null。
 		 * @param bytes dxr文件字节流
 		 * @param keys 要移除的键值列表
 		 */		
@@ -48,6 +51,14 @@ package org.flexlite.domDisplay.utils
 				if(keys.indexOf(key)!=-1)
 					delete keyObject.keyList[key];
 			}
+			var has:Boolean = false;
+			for(key in keyObject.keyList)
+			{
+				has = true;
+				break;
+			}
+			if(!has)
+				return null;
 			return DxrEncoder.writeObject(keyObject);
 		}
 		/**

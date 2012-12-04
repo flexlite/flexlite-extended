@@ -7,24 +7,40 @@ package org.flexlite.domUtils
 	public class StringUtil
 	{
 		/**
-		 * 去掉字符串两端所有连续的Tab，空格，换行，回车这些不可见的字符。
+		 * 去掉字符串两端所有连续的不可见字符。
 		 * 注意：若目标字符串为null或不含有任何可见字符,将输出空字符串""。
 		 * @param str 要格式化的字符串
 		 */		
 		public static  function trim(str:String):String
 		{
+			return trimLeft(trimRight(str));
+		}
+		/**
+		 * 去除字符串左边所有连续的不可见字符。
+		 * @param str 要格式化的字符串
+		 */		
+		public static function trimLeft(str:String):String
+		{
 			if(str==""||str==null)
 				return "";
 			var char:String = str.charAt(0);
 			while(str.length>0&&
-				(char==" "||char=="\t"||char=="\n"||char=="\r"))
+				(char==" "||char=="\t"||char=="\n"||char=="\r"||char=="\f"))
 			{
 				str = str.substr(1);
 				char = str.charAt(0);
 			}
-			char = str.charAt(str.length-1);
+			return str;
+		}
+		/**
+		 * 去除字符串右边所有连续的不可见字符。
+		 * @param str 要格式化的字符串
+		 */
+		public static function trimRight(str:String):String
+		{
+			var char:String = str.charAt(str.length-1);
 			while(str.length>0&&
-				(char==" "||char=="\t"||char=="\n"||char=="\r"))
+				(char==" "||char=="\t"||char=="\n"||char=="\r"||char=="\f"))
 			{
 				str = str.substr(0,str.length-1);
 				char = str.charAt(str.length-1);
