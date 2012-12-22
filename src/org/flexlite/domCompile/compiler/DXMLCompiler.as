@@ -602,11 +602,15 @@ package org.flexlite.domCompile.compiler
 				{
 				}
 			}
-			var stream:FileStream = new FileStream;
-			stream.open(file, FileMode.WRITE);
-			_resultCode = currentClass.toCode();
-			stream.writeUTFBytes(_resultCode)
-			stream.close();
+			try
+			{
+				var stream:FileStream = new FileStream;
+				stream.open(file, FileMode.WRITE);
+				_resultCode = currentClass.toCode();
+				stream.writeUTFBytes(_resultCode)
+				stream.close();
+			}
+			catch(e:Error){}
 			
 			var event:CompileEvent = new CompileEvent(CompileEvent.COMPILE_COMPLETE);
 			event.xmlPath = this.xmlPath;
