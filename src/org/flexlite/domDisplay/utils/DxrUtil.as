@@ -14,11 +14,10 @@ package org.flexlite.domDisplay.utils
 	public class DxrUtil
 	{
 		/**
-		 * 从Dxr文件中移除指定的键值列表,若要删除的文件已经不存在key，则不保存新文件。
+		 * 从Dxr文件中移除指定的键值列表。
 		 * @param dxrPath dxr文件路径
 		 * @param keys 要移除的键值列表
-		 * @param newPath 修改完成后存储的路径，不设置则覆盖源文件。
-		 * @return 是否移除成功
+		 * @param newPath 修改完成后存储的路径，不设置则覆盖源文件(若要删除的文件已经不存在key，则直接删除源文件)。
 		 */		
 		public static function remove(dxrPath:String,keys:Array,newPath:String=""):void
 		{
