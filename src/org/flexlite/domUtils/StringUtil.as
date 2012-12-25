@@ -38,6 +38,8 @@ package org.flexlite.domUtils
 		 */
 		public static function trimRight(str:String):String
 		{
+			if(str==""||str==null)
+				return "";
 			var char:String = str.charAt(str.length-1);
 			while(str.length>0&&
 				(char==" "||char=="\t"||char=="\n"||char=="\r"||char=="\f"))
