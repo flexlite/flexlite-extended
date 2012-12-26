@@ -1,10 +1,17 @@
 package org.flexlite.domUtils
 {
 	import com.codeazur.as3swf.SWF;
+	import com.codeazur.as3swf.data.SWFFillStyle;
 	import com.codeazur.as3swf.data.SWFScene;
+	import com.codeazur.as3swf.data.SWFShapeRecord;
+	import com.codeazur.as3swf.data.SWFShapeRecordStyleChange;
+	import com.codeazur.as3swf.data.SWFShapeWithStyle;
 	import com.codeazur.as3swf.data.SWFSymbol;
+	import com.codeazur.as3swf.tags.IDefinitionTag;
 	import com.codeazur.as3swf.tags.ITag;
+	import com.codeazur.as3swf.tags.TagDefineBits;
 	import com.codeazur.as3swf.tags.TagDefineBitsJPEG2;
+	import com.codeazur.as3swf.tags.TagDefineBitsLossless;
 	import com.codeazur.as3swf.tags.TagDefineSceneAndFrameLabelData;
 	import com.codeazur.as3swf.tags.TagDefineShape;
 	import com.codeazur.as3swf.tags.TagDefineShape4;
@@ -27,7 +34,7 @@ package org.flexlite.domUtils
 	public class SwfUtil
 	{
 		/**
-		 * 合并指定的SWF文件字节流列表
+		 * 合并指定的SWF文件字节流列表，导出的SWF移除了所有添加在舞台上的显示对象。
 		 */		
 		public static function mergeBytes(swfBytesList:Array):ByteArray
 		{
@@ -44,7 +51,7 @@ package org.flexlite.domUtils
 			var symbolTag:TagSymbolClass = new TagSymbolClass();
 			for each(var info:TagInfo in infoList)
 			{
-				characterId = updateID(info,characterId);
+				characterId = updateId(info,characterId);
 				tags = tags.concat(info.tags);
 				abcTags = abcTags.concat(info.abcTags);
 				for each(var symbol:SWFSymbol in info.symbolTag.symbols)
@@ -54,7 +61,8 @@ package org.flexlite.domUtils
 			}
 			
 			tags = tags.concat(abcTags);
-			tags.push(symbolTag);
+			if(symbolTag.symbols.length>0)
+				tags.push(symbolTag);
 			tags.push(new TagShowFrame);
 			tags.push(new TagEnd);
 			tags.splice(0,0,new TagFileAttributes());
@@ -67,78 +75,116 @@ package org.flexlite.domUtils
 			var newBytes:ByteArray = new ByteArray();
 			newSwf.publish(newBytes);
 			return newBytes;
-			
-			function getTagInfo(bytes:ByteArray):TagInfo
+		}
+		/**
+		 * 从字节流内获取标签信息
+		 */		
+		private static function getTagInfo(bytes:ByteArray):TagInfo
+		{
+			var swf:SWF = new SWF(bytes);
+			var tags:Vector.<ITag> = swf.tags;
+			var length:int = tags.length;
+			var tag:ITag;
+			var info:TagInfo = new TagInfo();
+			for(var i:int=0;i<length;i++)
 			{
-				var swf:SWF = new SWF(bytes);
-				var tags:Vector.<ITag> = swf.tags;
-				var length:int = tags.length;
-				var tag:ITag;
-				var info:TagInfo = new TagInfo();
-				for(var i:int=0;i<length;i++)
+				tag = tags[i];
+				if(tag is TagFileAttributes||tag is TagMetadata||tag is TagShowFrame||tag is TagEnd||
+					tag is TagDefineSceneAndFrameLabelData||tag is TagSetBackgroundColor||tag is TagPlaceObject)
 				{
-					tag = tags[i];
-					if(tag is TagFileAttributes||tag is TagMetadata||tag is TagShowFrame||tag is TagEnd||
-						tag is TagDefineSceneAndFrameLabelData||tag is TagSetBackgroundColor||tag is TagPlaceObject)
-					{
-						continue;
-					}
-					if(tag is TagSymbolClass)
-						info.symbolTag = tag as TagSymbolClass;
-					else if(tag is TagDoABC)
-						info.abcTags.push(tag);
-					else
-						info.tags.push(tag);
+					continue;
 				}
-				return info;
+				if(tag is TagSymbolClass)
+					info.symbolTag = tag as TagSymbolClass;
+				else if(tag is TagDoABC)
+					info.abcTags.push(tag);
+				else
+					info.tags.push(tag);
 			}
-			
-			function updateID(info:TagInfo,startID:uint=1):uint
+			if(!info.symbolTag)
+				info.symbolTag = new TagSymbolClass();
+			return info;
+		}
+		/**
+		 * 更新标签列表的characterId
+		 */		
+		private static function updateId(info:TagInfo,characterId:uint=1):uint
+		{
+			var tag:Object;
+			for each(tag in info.tags)
 			{
-				var tag:Object;
-				for each(tag in info.tags)
+				if(tag  is IDefinitionTag)
 				{
-					if(!tag.hasOwnProperty("characterId")||tag is TagPlaceObject)
-					{
-						continue;
-					}
-					replaceID(info,tag["characterId"],startID);
-					tag["characterId"] = startID;
-					startID++;
+					var isBitmap:Boolean = (tag is TagDefineBits||tag is TagDefineBitsLossless);
+					replaceId(info,IDefinitionTag(tag).characterId,characterId,isBitmap);
+					IDefinitionTag(tag).characterId = characterId;
+					characterId++;
 				}
-				return startID;
 			}
-			
-			function replaceID(info:TagInfo,oldID:uint,newID:uint):void
+			return characterId;
+		}
+		/**
+		 * 替换引用的characterId
+		 */		
+		private static function replaceId(info:TagInfo,oldId:uint,newId:uint,checkShape:Boolean=false):void
+		{
+			var tag:Object;
+			for each(tag in info.tags)
 			{
-				var tag:Object;
-				for each(tag in info.tags)
+				if(tag is TagDefineSprite)
 				{
-					if(tag is TagDefineSprite)
+					for each(tag in TagDefineSprite(tag).tags)
 					{
-						for each(tag in TagDefineSprite(tag).tags)
+						if(tag is TagPlaceObject&&TagPlaceObject(tag).characterId==oldId)
 						{
-							if(tag is TagPlaceObject&&tag["characterId"]==oldID)
+							TagPlaceObject(tag).characterId = newId;
+						}
+					}
+				}
+				else if(checkShape&&tag is TagDefineShape)
+				{
+					var shapes:SWFShapeWithStyle = TagDefineShape(tag).shapes;
+					var fillStyle:SWFFillStyle;
+					for each(fillStyle in shapes.initialFillStyles)
+					{
+						checkSwfFillStyle(fillStyle,oldId,newId);
+					}
+					var record:SWFShapeRecord;
+					for each(record in shapes.records)
+					{
+						if(record is SWFShapeRecordStyleChange)
+						{
+							for each(fillStyle in SWFShapeRecordStyleChange(record).fillStyles)
 							{
-								tag["characterId"] = newID;
+								checkSwfFillStyle(fillStyle,oldId,newId);
 							}
 						}
 					}
 				}
-				var symbol:SWFSymbol;
-				for each(symbol in info.symbolTag.symbols)
+			}
+			var symbol:SWFSymbol;
+			for each(symbol in info.symbolTag.symbols)
+			{
+				if(symbol.tagId==oldId)
+					symbol.tagId = newId;
+			}
+			
+			function checkSwfFillStyle(fillStyle:SWFFillStyle,oldId:uint,newId:uint):void
+			{
+				var type:uint = fillStyle.type;
+				if(fillStyle.bitmapId==oldId&&(type==0x40||type==0x41||type==0x42||type==0x43))
 				{
-					if(symbol.tagId==oldID)
-						symbol.tagId = newID;
+					fillStyle.bitmapId = newId;
 				}
 			}
 		}
+		
 		/**
 		 * 从一个SWF文件字节流里提取指定列表的导出类,返回新的SWF文件字节流,若所有类名都不存在，返回null。
 		 * @param bytes 要从中提取类定义的SWF字节流
 		 * @param symbols 要提取导出类名列表
 		 */		
-		public static function extractFromBytes(bytes:ByteArray,symbols:Array):ByteArray
+		public static function extractSymbols(bytes:ByteArray,symbols:Array):ByteArray
 		{
 			var oldSwf:SWF = new SWF(bytes);
 			var oldTags:Vector.<ITag> = oldSwf.tags;
@@ -191,27 +237,29 @@ package org.flexlite.domUtils
 			newSwf.publish(newBytes);
 			return newBytes;
 			
-			function getTags(swf:SWF,tagId:uint,tags:Array):void
-			{
-				var tag:ITag = swf.getCharacter(tagId);
-				if(tag is TagDefineSprite)
-				{
-					for each(var childTag:ITag in (tag as TagDefineSprite).tags)
-					{
-						if(childTag is TagPlaceObject)
-						{
-							getTags(swf,(childTag as TagPlaceObject).characterId,tags);
-						}
-					}
-				}
-				if(tags.indexOf(tag)==-1)
-					tags.push(tag);
-			}
-			
 			function compareFunction(tagA:ITag,tagB:ITag):int
 			{
 				return tagA["characterId"]-tagB["characterId"];
 			}
+		}
+		/**
+		 * 根据characterId获取一个标签及其所有引用的子标签列表
+		 */		
+		private static function getTags(swf:SWF,tagId:uint,tags:Array):void
+		{
+			var tag:ITag = swf.getCharacter(tagId);
+			if(tag is TagDefineSprite)
+			{
+				for each(var childTag:ITag in (tag as TagDefineSprite).tags)
+				{
+					if(childTag is TagPlaceObject)
+					{
+						getTags(swf,(childTag as TagPlaceObject).characterId,tags);
+					}
+				}
+			}
+			if(tags.indexOf(tag)==-1)
+				tags.push(tag);
 		}
 		
 		/**
