@@ -282,6 +282,7 @@ package org.flexlite.domUtils
 			var newSwf:SWF = new SWF();
 			newSwf.version = oldSwf.version;
 			newSwf.frameCount = oldSwf.frameCount;
+			newSwf.frameRate = oldSwf.frameRate;
 			for each(tag in newTags)
 			{
 				newSwf.tags.push(tag);
