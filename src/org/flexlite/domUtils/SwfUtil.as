@@ -4,6 +4,7 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.data.SWFScene;
 	import com.codeazur.as3swf.data.SWFSymbol;
 	import com.codeazur.as3swf.tags.ITag;
+	import com.codeazur.as3swf.tags.TagDefineBitsJPEG2;
 	import com.codeazur.as3swf.tags.TagDefineSceneAndFrameLabelData;
 	import com.codeazur.as3swf.tags.TagDefineShape;
 	import com.codeazur.as3swf.tags.TagDefineShape4;
@@ -11,6 +12,7 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.TagDoABC;
 	import com.codeazur.as3swf.tags.TagEnd;
 	import com.codeazur.as3swf.tags.TagFileAttributes;
+	import com.codeazur.as3swf.tags.TagMetadata;
 	import com.codeazur.as3swf.tags.TagPlaceObject;
 	import com.codeazur.as3swf.tags.TagSetBackgroundColor;
 	import com.codeazur.as3swf.tags.TagShowFrame;
@@ -24,6 +26,113 @@ package org.flexlite.domUtils
 	 */
 	public class SwfUtil
 	{
+		/**
+		 * 合并指定的SWF文件字节流列表
+		 */		
+		public static function mergeBytes(swfBytesList:Array):ByteArray
+		{
+			if(!swfBytesList||swfBytesList.length==0)
+				return null;
+			var infoList:Vector.<TagInfo> = new Vector.<TagInfo>();
+			for each(var bytes:ByteArray in swfBytesList)
+			{
+				infoList.push(getTagInfo(bytes));
+			}
+			var characterId:int = 1;
+			var tags:Array = [];
+			var abcTags:Array = [];
+			var symbolTag:TagSymbolClass = new TagSymbolClass();
+			for each(var info:TagInfo in infoList)
+			{
+				characterId = updateID(info,characterId);
+				tags = tags.concat(info.tags);
+				abcTags = abcTags.concat(info.abcTags);
+				for each(var symbol:SWFSymbol in info.symbolTag.symbols)
+				{
+					symbolTag.symbols.push(symbol);
+				}
+			}
+			
+			tags = tags.concat(abcTags);
+			tags.push(symbolTag);
+			tags.push(new TagShowFrame);
+			tags.push(new TagEnd);
+			tags.splice(0,0,new TagFileAttributes());
+			
+			var newSwf:SWF = new SWF();
+			for each(var tag:ITag in tags)
+			{
+				newSwf.tags.push(tag);
+			}
+			var newBytes:ByteArray = new ByteArray();
+			newSwf.publish(newBytes);
+			return newBytes;
+			
+			function getTagInfo(bytes:ByteArray):TagInfo
+			{
+				var swf:SWF = new SWF(bytes);
+				var tags:Vector.<ITag> = swf.tags;
+				var length:int = tags.length;
+				var tag:ITag;
+				var info:TagInfo = new TagInfo();
+				for(var i:int=0;i<length;i++)
+				{
+					tag = tags[i];
+					if(tag is TagFileAttributes||tag is TagMetadata||tag is TagShowFrame||tag is TagEnd||
+						tag is TagDefineSceneAndFrameLabelData||tag is TagSetBackgroundColor||tag is TagPlaceObject)
+					{
+						continue;
+					}
+					if(tag is TagSymbolClass)
+						info.symbolTag = tag as TagSymbolClass;
+					else if(tag is TagDoABC)
+						info.abcTags.push(tag);
+					else
+						info.tags.push(tag);
+				}
+				return info;
+			}
+			
+			function updateID(info:TagInfo,startID:uint=1):uint
+			{
+				var tag:Object;
+				for each(tag in info.tags)
+				{
+					if(!tag.hasOwnProperty("characterId")||tag is TagPlaceObject)
+					{
+						continue;
+					}
+					replaceID(info,tag["characterId"],startID);
+					tag["characterId"] = startID;
+					startID++;
+				}
+				return startID;
+			}
+			
+			function replaceID(info:TagInfo,oldID:uint,newID:uint):void
+			{
+				var tag:Object;
+				for each(tag in info.tags)
+				{
+					if(tag is TagDefineSprite)
+					{
+						for each(tag in TagDefineSprite(tag).tags)
+						{
+							if(tag is TagPlaceObject&&tag["characterId"]==oldID)
+							{
+								tag["characterId"] = newID;
+							}
+						}
+					}
+				}
+				var symbol:SWFSymbol;
+				for each(symbol in info.symbolTag.symbols)
+				{
+					if(symbol.tagId==oldID)
+						symbol.tagId = newID;
+				}
+			}
+		}
 		/**
 		 * 从一个SWF文件字节流里提取指定列表的导出类,返回新的SWF文件字节流,若所有类名都不存在，返回null。
 		 * @param bytes 要从中提取类定义的SWF字节流
@@ -187,4 +296,20 @@ package org.flexlite.domUtils
 		}
 		
 	}
+}
+import com.codeazur.as3swf.tags.ITag;
+import com.codeazur.as3swf.tags.TagDoABC;
+import com.codeazur.as3swf.tags.TagSymbolClass;
+
+class TagInfo
+{
+	public function TagInfo()
+	{
+	}
+	
+	public var tags:Array = [];
+	
+	public var abcTags:Array = [];
+	
+	public var symbolTag:TagSymbolClass;
 }
