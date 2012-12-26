@@ -2,6 +2,7 @@ package org.flexlite.domUtils
 {
 	import com.codeazur.as3swf.SWF;
 	import com.codeazur.as3swf.data.SWFFillStyle;
+	import com.codeazur.as3swf.data.SWFMatrix;
 	import com.codeazur.as3swf.data.SWFShapeRecord;
 	import com.codeazur.as3swf.data.SWFShapeRecordStyleChange;
 	import com.codeazur.as3swf.data.SWFShapeWithStyle;
@@ -18,9 +19,11 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.TagFileAttributes;
 	import com.codeazur.as3swf.tags.TagMetadata;
 	import com.codeazur.as3swf.tags.TagPlaceObject;
+	import com.codeazur.as3swf.tags.TagPlaceObject2;
 	import com.codeazur.as3swf.tags.TagSetBackgroundColor;
 	import com.codeazur.as3swf.tags.TagShowFrame;
 	import com.codeazur.as3swf.tags.TagSymbolClass;
+	import com.codeazur.as3swf.timeline.Frame;
 	
 	import flash.utils.ByteArray;
 	
@@ -190,13 +193,15 @@ package org.flexlite.domUtils
 			var symbolIndex:int = -1;
 			var i:int;
 			var placeTags:Array = [];
+			var tag:ITag;
 			for(i=0;i<length;i++)
 			{
-				if(tags[i] is TagPlaceObject)
+				tag = tags[i];
+				if(tag is TagPlaceObject)
 				{
-					placeTags.push(tags[i]);
+					placeTags.push(tag);
 				}
-				else if(tags[i] is TagSymbolClass)
+				else if(tag is TagSymbolClass)
 				{
 					symbolIndex = i;
 				}
@@ -214,7 +219,28 @@ package org.flexlite.domUtils
 					continue;
 				var symbol:SWFSymbol = new SWFSymbol();
 				symbol.name = symbols[i];
-				symbol.tagId = placeTag.characterId;
+				tag = swf.getCharacter(placeTag.characterId);
+				if(tag is TagDefineShape)
+				{
+					var spriteTag:TagDefineSprite = new TagDefineSprite();
+					spriteTag.characterId = tags.length-2;
+					var place:TagPlaceObject2 = new TagPlaceObject2();
+					place.hasCharacter = true;
+					place.hasMatrix = true;
+					place.depth = 1;
+					place.characterId = placeTag.characterId;
+					place.matrix = new SWFMatrix();
+					spriteTag.tags.push(place);
+					spriteTag.tags.push(new TagShowFrame());
+					spriteTag.tags.push(new TagEnd());
+					index = tags.indexOf(tag);
+					tags.splice(index+1,0,spriteTag);
+					symbol.tagId = spriteTag.characterId;
+				}
+				else
+				{
+					symbol.tagId = placeTag.characterId;
+				}
 				symbolTag.symbols.push(symbol);
 			}
 			if(symbolTag.symbols.length==0)
@@ -301,7 +327,14 @@ package org.flexlite.domUtils
 		 */		
 		private static function getTags(swf:SWF,tagId:uint,tags:Array):void
 		{
-			var tag:ITag = swf.getCharacter(tagId);
+			var tag:ITag;
+			for each(tag in swf.tags)
+			{
+				if(tag is IDefinitionTag&&IDefinitionTag(tag).characterId==tagId)
+				{
+					break;
+				}
+			}
 			var childTag:ITag;
 			if(tag is TagDefineSprite)
 			{
