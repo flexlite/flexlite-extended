@@ -57,6 +57,7 @@ package org.flexlite.domUI.managers
 		 */		
 		private function onAddToStage(event:Event=null):void
 		{
+			stage.stageFocusRect=false;
 			DomGlobals._systemManager = this;
 			addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, true, 1000);
 			addEventListener(MouseEvent.MOUSE_WHEEL, mouseEventHandler, true, 1000);
