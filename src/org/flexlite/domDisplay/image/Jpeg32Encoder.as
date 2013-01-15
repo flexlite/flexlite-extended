@@ -6,11 +6,13 @@ package org.flexlite.domDisplay.image
 	import flash.geom.Point;
 	import flash.utils.ByteArray;
 	
+	import mx.graphics.codec.JPEGEncoder;
+	
 	import org.flexlite.domDisplay.codec.IBitmapEncoder;
 	
 	
 	/**
-	 * JPEG32位图编码器,需要Flash Player11.3及以上版本支持
+	 * JPEG32位图编码器,由于AIR3.4的JPEG编码器有色差的bug，暂时使用此编码器替代库里的对应编码器。
 	 * @author DOM
 	 */
 	public class Jpeg32Encoder implements IBitmapEncoder
@@ -23,24 +25,20 @@ package org.flexlite.domDisplay.image
 		{
 			encodeOptions = new JPEGEncoderOptions(quality);
 		}
-		/**
-		 * @inheritDoc
-		 */
+		
 		public function get codecKey():String
 		{
 			return "jpeg32";
 		}
 		
 		private var encodeOptions:JPEGEncoderOptions;
-		/**
-		 * @inheritDoc
-		 */
+
 		public function encode(bitmapData:BitmapData):ByteArray
 		{
 			var aBlock:ByteArray = getAlphaDataBlock(bitmapData);
 			var aBlockLength:uint = aBlock.length;			
-			var bBlock:ByteArray = new ByteArray;
-			bitmapData.encode(bitmapData.rect,encodeOptions,bBlock);
+			var encoder:JPEGEncoder = new JPEGEncoder;
+			var bBlock:ByteArray = encoder.encode(bitmapData);
 			var fBlock:ByteArray = new ByteArray();
 			
 			fBlock.position = 0;
@@ -59,8 +57,7 @@ package org.flexlite.domDisplay.image
 		private static function getAlphaDataBlock(source:BitmapData):ByteArray
 		{
 			var alphaBitmapData:BitmapData = new BitmapData(source.width,source.height,true,0);
-			alphaBitmapData.copyChannel(source,source.rect,new Point(),
-				BitmapDataChannel.ALPHA,BitmapDataChannel.ALPHA);
+			alphaBitmapData.copyChannel(source,source.rect,new Point(),BitmapDataChannel.ALPHA,BitmapDataChannel.ALPHA);
 			var bytes:ByteArray = new ByteArray();
 			bytes.position = 0;
 			bytes.writeUTF("alphaBlock");

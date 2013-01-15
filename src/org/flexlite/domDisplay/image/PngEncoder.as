@@ -4,6 +4,8 @@ package org.flexlite.domDisplay.image
 	import flash.display.PNGEncoderOptions;
 	import flash.utils.ByteArray;
 	
+	import mx.graphics.codec.PNGEncoder;
+	
 	import org.flexlite.domDisplay.codec.IBitmapEncoder;
 	
 	
@@ -35,9 +37,8 @@ package org.flexlite.domDisplay.image
 		 */
 		public function encode(bitmapData:BitmapData):ByteArray
 		{
-			var byteArray:ByteArray = new ByteArray;
-			bitmapData.encode(bitmapData.rect,encodeOptions,byteArray);
-			return byteArray;
+			var pngEncoer:PNGEncoder = new PNGEncoder();
+			return pngEncoer.encode(bitmapData);
 		}
 	}
 }
