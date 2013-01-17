@@ -26,6 +26,7 @@ package org.flexlite.domUtils.loader
 		private static const FORMAT_BITMAP:int = 1;
 		private static const FORMAT_BITMAP_DATA:int= 2;
 		private static const FORMAT_EXTERNAL_CLASS:int= 3;
+		private static const FORMAT_EXTERNAL_CLASSES:int = 4;
 		
 		private var className:String = "";
 		
@@ -83,6 +84,21 @@ package org.flexlite.domUtils.loader
 			format = FORMAT_EXTERNAL_CLASS;
 			this.appDomain = appDomain;
 			this.className = className;
+			load(url,onComp,onProgress,onIoError);
+		}
+		
+		/**
+		 * 根据url获取指定文件的所有Class类定义和键名数据
+		 * @param url 文件的url路径
+		 * @param onComp 返回结果时的回调函数 onComp(clslist:Array, keylist:Array)
+		 * @param onProgress 加载进度回调函数 onProgress(event:ProgressEvent)
+		 * @param onIoError 加载失败回调函数 onIoError(event:IOErrorEvent)
+		 * @param appDomain 加载使用的程序域
+		 */	
+		public function loadExternalClasses(url:String,onComp:Function,onProgress:Function=null,onIoError:Function=null,appDomain:ApplicationDomain=null):void
+		{
+			format = FORMAT_EXTERNAL_CLASSES;
+			this.appDomain = appDomain;
 			load(url,onComp,onProgress,onIoError);
 		}
 		
@@ -155,6 +171,28 @@ package org.flexlite.domUtils.loader
 						}
 						compFunc(classData);
 						loader.unload();
+						break;
+					case FORMAT_EXTERNAL_CLASSES:
+						var classList:Array = [];
+						var keyList:Array = [];
+						var tmpAppDomain:ApplicationDomain = loader.contentLoaderInfo.applicationDomain;
+						var linkNameList:Vector.<String> = tmpAppDomain.getQualifiedDefinitionNames();
+						for each(var linkname:String in linkNameList)
+						{
+							keyList.push(linkname);
+						}
+						var tmpClassData:Class;
+						for each (var linkName:String in linkNameList)
+						{
+							if(tmpAppDomain.hasDefinition(linkName))
+							{
+								tmpClassData = tmpAppDomain.getDefinition(linkName) as Class;
+								classList.push(tmpClassData);
+							}
+						}
+						compFunc(classList, keyList);
+						loader.unload();
+						break;
 					default:;
 				}
 				

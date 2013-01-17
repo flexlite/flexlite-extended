@@ -107,6 +107,20 @@ package org.flexlite.domUtils
 		}
 		
 		/**
+		 * 根据url获取指定文件的所有Class类定义和键名数据
+		 * @param url 文件的url路径
+		 * @param onComp 返回结果时的回调函数 onComp(clslist:Array, keylist:Array)
+		 * @param onProgress 加载进度回调函数 onProgress(event:ProgressEvent)
+		 * @param onIoError 加载失败回调函数 onIoError(event:IOErrorEvent
+		 * @param appDomain 加载使用的程序域
+		 */
+		public static function loadExternalClasses(url:String, onComp:Function, onProgress:Function=null, onIoError:Function=null,appDomain:ApplicationDomain=null):void
+		{
+			var classLoader:SingleLoader = new SingleLoader;
+			classLoader.loadExternalClasses(url,onComp,onProgress,onIoError,appDomain);
+		}
+		
+		/**
 		 * 根据url获取指定文件的文档类显示对象
 		 * @param url 文件的url路径
 		 * @param onComp 返回结果时的回调函数 onComp(root:DisplayObjectContainer,appDomain:ApplicationDomain)
