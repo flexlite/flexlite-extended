@@ -1,9 +1,5 @@
 package org.flexlite.domCompile.compiler
 {
-	import flash.events.EventDispatcher;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
 	import flash.utils.Dictionary;
 	
 	import org.flexlite.domCompile.consts.KeyWords;
@@ -13,266 +9,39 @@ package org.flexlite.domCompile.compiler
 	import org.flexlite.domCompile.core.CpFunction;
 	import org.flexlite.domCompile.core.CpNotation;
 	import org.flexlite.domCompile.core.CpVariable;
-	import org.flexlite.domCompile.events.CompileEvent;
 	import org.flexlite.domCore.DXML;
-	import org.flexlite.domUtils.DomLoader;
 	import org.flexlite.domUtils.StringUtil;
 	
 	/**
-	 * 编译成功 
-	 */	
-	[Event(name="compileComplete", type="org.flexlite.domCompile.events.CompileEvent")]
-	
-	/**
-	 * 编译失败 
-	 */	
-	[Event(name="compileError", type="org.flexlite.domCompile.events.CompileEvent")]
-	
-	/**
-	 * DXML皮肤编译器 
+	 * DXML文件编译器 
 	 * @author DOM
 	 */	
-	public class DXMLCompiler extends EventDispatcher
+	public class DXMLCompiler
 	{
+		/**
+		 * 构造函数
+		 */		
 		public function DXMLCompiler()
 		{
 			super();
 		}
 		
-		
-		private static const FACTORY_CLASS_PACKAGE:String = "org.flexlite.domUI.core.DeferredInstanceFromFunction";
-		
-		private static const FACTORY_CLASS:String = "DeferredInstanceFromFunction";
-		
-		private static const ADD_ITEMS_PACKAGE:String = "org.flexlite.domUI.states.AddItems";
-		
-		private static const SETPROPERTY_PACKAGE:String = "org.flexlite.domUI.states.SetProperty";
-		
-		private static const DECLARATIONS:String = "Declarations";
 		/**
-		 * 使用框架配置文件的默认命名空间 
-		 */		
-		private static const DEFAULT_NS:Array = 
-			   [DXML.NS,
-				new Namespace("s","library://ns.adobe.com/flex/spark"),
-				new Namespace("mx","library://ns.adobe.com/flex/mx"),
-				new Namespace("fx","http://ns.adobe.com/mxml/2009")];
-		
-		/**
-		 * 指定的命名空间是否是默认命名空间
-		 */		
-		private static function isDefaultNs(ns:Namespace):Boolean
-		{
-			for each(var dns:Namespace in DEFAULT_NS)
-			{
-				if(ns==dns)
-					return true;
-			}
-			return false;
-		}
-		
-		
-		
-		private static var _configData:XML;
-
-		/**
-		 * 框架配置文件 
+		 * flexlite-manifest框架清单文件
 		 */
-		public static function get configData():XML
-		{
-			return _configData;
-		}
-		public static function set configData(value:XML):void
-		{
-			_configData = value;
-		}
-		
-		private static var _projectConfigData:XML;
+		public static var configData:XML;
 		/**
 		 * 项目配置文件
 		 */
-		public static function get projectConfigData():XML
-		{
-			return _projectConfigData;
-		}
-
-		public static function set projectConfigData(value:XML):void
-		{
-			_projectConfigData = value;
-		}
-		
-		/**
-		 * 标记指定的文件需要重新编译
-		 */		
-		public static function markChanged(packageName:String):void
-		{
-			if(_projectConfigData==null)
-				return;
-			for each(var node:XML in _projectConfigData.children())
-			{
-				if(node.@p == packageName)
-				{
-					node.@changed = "true";
-					return;
-				}
-			}
-		}
-		
-		/**
-		 * 根据类名获取对应的包，并自动导入相应的包
-		 */		
-		private function getPackageByNode(node:XML):String
-		{
-			var packageName:String = "";
-			var config:XML = getConfigNode(node);
-			if(config!=null)
-				packageName = config.@p;
-			if(packageName!=""&&packageName.indexOf(".")!=-1)
-			{
-				currentClass.addImport(packageName);
-			}
-			return packageName;
-		}
-		/**
-		 * 获取配置节点
-		 */		
-		private static function getConfigNode(node:XML):XML
-		{
-			var ns:Namespace = node.namespace();
-			var className:String = node.localName();
-			if(isDefaultNs(ns))
-			{
-				for each(var component:XML in configData.children())
-				{
-					if(component.@id==className)
-					{
-						return component;
-					}
-				}
-			}
-			else if(projectConfigData!=null)
-			{
-				for each(var item:XML in projectConfigData.children())
-				{
-					if(item.localName()==className&&item.namespace()==ns)
-					{
-						return item;
-					}
-				}
-			}
-			return null;
-		}
-		/**
-		 * 根据包名获取配置节点
-		 */		
-		private static function getConfigNodeByPackage(packageName:String):XML
-		{
-			for each(var component:XML in configData.children())
-			{
-				if(component.@p==packageName)
-				{
-					return component;
-				}
-			}
-			if(projectConfigData!=null)
-			{
-				for each(var item:XML in projectConfigData.children())
-				{
-					if(item.@p == packageName)
-					{
-						return item;
-					}
-				}
-			}
-			return null;
-		}
-		/**
-		 * 根据类名获取对应默认属性
-		 */
-		private static function getDefaultPropByNode(node:XML):Object
-		{
-			var config:XML = getConfigNode(node);
-			if(config==null)
-				return {d:"",array:false};
-			findProp(config);
-			return {d:config.@d,array:config.@array=="true"};
-		}
-		/**
-		 * 递归查询默认值
-		 */		
-		private static function findProp(node:XML):String
-		{
-			if(node.hasOwnProperty("@d"))
-			{
-				return node.@d;
-			}
-			
-			var superClass:String = node.@s;
-			var superNode:XML;
-			var item:XML;
-			var found:Boolean;
-			for each(item in _configData.children())
-			{
-				if(item.@p==superClass)
-				{
-					superNode = item;
-					break;
-				}
-			}
-			if(!found&&projectConfigData!=null)
-			{
-				for each(item in _projectConfigData.children())
-				{
-					if(item.@p==superClass)
-					{
-						superNode = item;
-						break;
-					}
-				}
-			}
-			if(superNode!=null)
-			{
-				var prop:String = findProp(superNode);
-				if(prop!="")
-				{
-					node.@d = prop;
-					if(superNode.hasOwnProperty("@array"))
-						node.@array = superNode.@array;
-				}
-			}
-			return node.@d;
-		}
-		/**
-		 * 指定的变量名是否是工程默认包里的类名
-		 */		
-		private static function isDefaultPackageClass(name:String):Boolean
-		{
-			if(_projectConfigData==null||name=="")
-				return false;
-			for each(var item:XML in _projectConfigData.children())
-			{
-				if(item.@p == name)
-					return true;
-			}
-			return false;
-		}
-		
-		/**
-		 * 检查变量是否是包名
-		 */		
-		private function isPackageName(name:String):Boolean
-		{
-			return name.indexOf(".")!=-1;
-		}
-		
+		public static var projectConfigData:XML;
 		/**
 		 * 当前类 
 		 */		
 		private var currentClass:CpClass;
 		/**
-		 * 当前要编译的皮肤文件 
+		 * 当前要编译的DXML文件 
 		 */		
-		private var currentSkin:XML;
+		private var currentXML:XML;
 		/**
 		 * id缓存字典 
 		 */		
@@ -282,352 +51,68 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private var stateCode:Vector.<CpState>;
 		/**
-		 * 工程目录 
+		 * 需要延迟创建的实例id列表
 		 */		
-		private var srcPath:String;
+		private var stateIds:Array = [];
 		/**
-		 * 皮肤文件路径 
+		 * 编译指定的XML对象为ActionScript类。
+		 * 注意:编译前要先注入flexlite-manifest.xml清单文件给manifestData属性。 清单文件可以用ManifestUtil类生成。
+		 * @param xmlData 要编译的dxml文件内容
+		 * @param className 要编译成的完整类名，包括包名。
 		 */		
-		private var xmlPath:String;
-		
-		/**
-		 * xml文件缓存路径
-		 */		
-		private var dxmlPath:String;
-		/**
-		 * 忽略编译子项时抛出的错误 
-		 */		
-		private var skipChildError:Boolean = true;
-		/**
-		 * 通过视图状态名称获取对应的视图状态
-		 */		
-		private function getStateByName(name:String):Vector.<CpState>
+		public function compile(xmlData:XML,className:String):String
 		{
-			var states:Vector.<CpState> = new Vector.<CpState>;
-			for each(var state:CpState in stateCode)
+			if(configData==null)
 			{
-				if(state.name == name)
-				{
-					if(states.indexOf(state)==-1)
-						states.push(state);
-				}
-				else if(state.stateGroups.length>0)
-				{
-					var found:Boolean = false;
-					for each(var g:String in state.stateGroups)
-					{
-						if(g==name)
-						{
-							found = true;
-							break;
-						}
-					}
-					if(found)
-					{
-						if(states.indexOf(state)==-1)
-							states.push(state);
-					}
-						
-				}
-					
+				throw new Error("还未注入flexlite-manifest框架清单配置数据！");
+				return "";
 			}
-			return states;
-		}
-		
-		/**
-		 * 编译指定路径的皮肤文件
-		 * @param xmlPath 皮肤文件的路径
-		 * @param srcPath 工程src根目录
-		 * @param dxmlPath dxml文件目录
-		 * @param xmlData 可选项，如果传入就不使用xmlPath重新加载xml数据
-		 */		
-		public function compile(xmlPath:String,srcPath:String,dxmlPath:String=null,xmlData:XML=null):void
-		{
+			if(!xmlData||!className)
+				return "";
+			
+			currentXML = new XML(xmlData);	
+			className = className.split("::").join(".");
+			idDic = new Dictionary;
+			stateCode = new Vector.<CpState>();
+			stateIds = [];
 			currentClass = new CpClass();
 			currentClass.notation = new CpNotation(
 				"@private\n此类由编译器自动生成，您应修改对应的DXML文件内容，然后重新编译，而不应直接修改其代码。\n@author DXMLCompiler");
-			idDic = new Dictionary;
-			stateCode = new Vector.<CpState>();
 			
-//			this.skipChildError = skipChildError;
-			var xmlFile:File = File.applicationDirectory.resolvePath(xmlPath);
-			if(!xmlFile.exists||xmlFile.isDirectory)
-			{
-				dispatchError("目标文件不存在:"+xmlFile.nativePath);
-				return;
-			}
-			this.xmlPath = xmlFile.nativePath;
-			var srcDir:File = File.applicationDirectory.resolvePath(srcPath);
-			this.srcPath = srcDir.nativePath;
-			var dxmlDir:File;
-			if(dxmlPath)
-			{
-				dxmlDir = File.applicationDirectory.resolvePath(dxmlPath);
-				this.dxmlPath = dxmlDir.nativePath;
-			}
-			else
-			{
-				this.dxmlPath = srcPath.substr(0,srcPath.length-3)+"dxml";
-				dxmlDir = new File(this.dxmlPath);
-			}
 			
-			var index:int = xmlFile.nativePath.indexOf(dxmlDir.nativePath)
-			if(index==-1)
-			{
-				dispatchError("目标文件"+xmlFile.nativePath+",不包含在指定的dxml工程目录下:"+dxmlDir.nativePath);
-				return;
-			}
-			
-			var subPath:String = xmlFile.nativePath.substring(dxmlDir.nativePath.length+1);
-			index = subPath.lastIndexOf(File.separator);
+			var index:int = className.lastIndexOf(".");
 			if(index!=-1)
 			{
-				currentClass.packageName = StringUtil.replaceStr(subPath.substr(0,index),File.separator,".");
-			}
-			index = xmlFile.name.lastIndexOf(".");
-			currentClass.className = xmlFile.name.substr(0,index);
-			
-			if(xmlData)
-			{
-				onXMLComp(xmlData);
+				currentClass.packageName = className.substring(0,index);
+				currentClass.className = className.substring(index+1);
 			}
 			else
 			{
-				loadXML(xmlPath);
+				currentClass.className = className;
 			}
+			startCompile();
+			var resutlCode:String = currentClass.toCode();
+			currentClass = null;
+			return resutlCode;
 		}
-		/**
-		 * 加载皮肤文件
-		 */		
-		private function loadXML(xmlPath:String):void
-		{
-			DomLoader.loadXML(xmlPath,onXMLComp);
-		}
-		
-		/**
-		 * 皮肤文件加载完成
-		 */		
-		private function onXMLComp(data:XML):void
-		{
-			currentSkin = data;	
-			if(data==null)
-			{
-				dispatchError("要编译的目标文件无法解析为有效的XML:"+xmlPath);
-				return;
-			}
-			if(_configData==null)
-			{
-				dispatchError("还未初始化编译器的框架配置文件数据！");
-				return;
-			}
-			else
-			{
-				needCompileList = []
-				var error:Boolean = checkNeedCompileList(currentSkin);
-				if(error&&!skipChildError)
-				{
-					return;
-				}
-				if(needCompileList.length>0)
-				{
-					startOneNeedCompile();
-				}
-				else
-				{
-					startCompile();
-				}
-			}
-		}
-		
-		private var needCompileList:Array = [];
-		/**
-		 * 递归检查需要先编译的子项列表,返回是否发生错误
-		 */		
-		private function checkNeedCompileList(item:XML):Boolean
-		{
-			var error:Boolean = false;
-			var config:XML;
-			if(!isProperty(item)&&item.localName()!=DECLARATIONS)
-			{
-				config = getConfigNode(item);
-				if(config==null)
-				{
-					if(!skipChildError)
-					{
-						dispatchError("找不到类的定义："+item.localName()+",位置:"+xmlPath);
-						return true;
-					}
-					error = true;
-				}
-				else if(!isDefaultNs(item.namespace())&&config.@changed=="true")
-				{
-					needCompileList.push(config);
-				}
-			}
-			//遍历属性
-			for each(var att:XML in item.attributes())
-			{
-				if(att.localName()=="skinClass")
-				{
-					config = getConfigNodeByPackage(att);
-					if(config==null)
-					{
-						if(!skipChildError)
-						{
-							dispatchError("找不到类的定义："+item.localName()+",位置:"+xmlPath);
-							return true;
-						}
-						error = true;
-					}
-					else if(config.@changed=="true")
-					{
-						needCompileList.push(config);
-					}
-				}
-			}
-			//遍历子节点
-			for each(var node:XML in item.children())
-			{
-				if(checkNeedCompileList(node))
-					error = true;
-			}
-			return error;
-		}
-		
-		/**
-		 * 开始一个待编译子项
-		 */		
-		private function startOneNeedCompile():void
-		{
-			if(needCompileList.length==0)
-			{
-				startCompile();
-				return;
-			}
-			var config:XML = needCompileList.pop();
-			var packageName:String = config.@p;
-			
-			var path:String = StringUtil.replaceStr(packageName,".",File.separator);
-			if(path!="")
-				path += "."+DXML.EXTENSION;
-			var xmlPath:String = this.dxmlPath+File.separator+path;
-			var skinCp:DXMLCompiler = new DXMLCompiler();
-			skinCp.addEventListener(CompileEvent.COMPILE_COMPLETE,onCompileComp);
-			skinCp.addEventListener(CompileEvent.COMPILE_ERROR,onCompileError);
-			skinCp.compile(xmlPath,this.srcPath,dxmlPath);
-		}
-		
-		/**
-		 * 编译一项成功
-		 */		
-		private function onCompileComp(event:CompileEvent):void
-		{
-			var skinCp:DXMLCompiler = event.target as DXMLCompiler;
-			skinCp.removeEventListener(CompileEvent.COMPILE_COMPLETE,onCompileComp);
-			skinCp.removeEventListener(CompileEvent.COMPILE_ERROR,onCompileError);
-			startOneNeedCompile();
-		}
-		/**
-		 * 编译失败
-		 */		
-		private function onCompileError(event:CompileEvent):void
-		{
-			var skinCp:DXMLCompiler = event.target as DXMLCompiler;
-			skinCp.removeEventListener(CompileEvent.COMPILE_COMPLETE,onCompileComp);
-			skinCp.removeEventListener(CompileEvent.COMPILE_ERROR,onCompileError);
-			if(skipChildError)
-			{
-				startOneNeedCompile();
-			}
-			else
-			{
-				dispatchError(event.message);
-			}
-		}
-		/**
-		 * 抛出错误事件
-		 */		
-		private function dispatchError(message:String):void
-		{
-			if(hasEventListener(CompileEvent.COMPILE_ERROR))
-			{
-				var event:CompileEvent = new CompileEvent(CompileEvent.COMPILE_ERROR);
-				event.message = message;
-				event.xmlPath = this.xmlPath;
-				event.srcPath = this.srcPath;
-				dispatchEvent(event);
-			}
-			else
-			{
-				throw new Error(message);
-			}
-		}
-		
-		
 		
 		/**
 		 * 开始编译
 		 */		
 		private function startCompile():void
 		{
-			currentClass.superClass = getPackageByNode(currentSkin);
-			stateIds = [];
-			addIds(currentSkin.children());
+			currentClass.superClass = getPackageByNode(currentXML);
 			
+			addIds(currentXML.children());
 			
 			createConstructFunc();
 			
-			
-			for each(var node:XML in currentSkin.children())
+			for each(var node:XML in currentXML.children())
 			{
 				createFuncForNode(node);
 			}
-			
-			var path:String = StringUtil.replaceStr(currentClass.packageName,".",File.separator);
-			if(path!="")
-				path += File.separator;
-			path += currentClass.className+".as";
-			var asPath:String = this.srcPath+File.separator+path;
-			var file:File = new File(asPath);
-			if(file.exists)
-			{
-				try
-				{
-					if(file.isDirectory)
-						file.deleteDirectory(true);
-					else
-						file.deleteFile();
-				}
-				catch(e:Error)
-				{
-				}
-			}
-			try
-			{
-				var stream:FileStream = new FileStream;
-				stream.open(file, FileMode.WRITE);
-				_resultCode = currentClass.toCode();
-				stream.writeUTFBytes(_resultCode)
-				stream.close();
-			}
-			catch(e:Error){}
-			
-			var event:CompileEvent = new CompileEvent(CompileEvent.COMPILE_COMPLETE);
-			event.xmlPath = this.xmlPath;
-			event.asPath = asPath;
-			event.srcPath = this.srcPath;
-			dispatchEvent(event);
 		}
 		
-		private var _resultCode:String = "";
-		/**
-		 * 编译后的代码
-		 */		
-		public function get resultCode():String
-		{
-			return _resultCode;
-		}
-	
 		/**
 		 * 添加必须的id
 		 */		
@@ -651,7 +136,7 @@ package org.flexlite.domCompile.compiler
 						createVarForNode(node);
 						
 						var parentNode:XML = node.parent() as XML;
-						if(isStateNode(node)&&parentNode!=null&&parentNode!=currentSkin
+						if(isStateNode(node)&&parentNode!=null&&parentNode!=currentXML
 							&&!currentClass.containsVar(getNodeId(parentNode)))
 						{
 							createVarForNode(parentNode);
@@ -1008,8 +493,8 @@ package org.flexlite.domCompile.compiler
 		private function formatString(value:String):String
 		{
 			value = "\""+value+"\"";
-			value = StringUtil.replaceStr(value,"\n","\\n");
-			value = StringUtil.replaceStr(value,"\r","\\n");
+			value = value.split("\n").join("\\n");
+			value = value.split("\r").join("\\n");
 			return value;
 		}
 		
@@ -1031,10 +516,6 @@ package org.flexlite.domCompile.compiler
 		}
 		
 		/**
-		 * 需要延迟创建的实例id列表
-		 */		
-		private var stateIds:Array = [];
-		/**
 		 * 创建构造函数
 		 */		
 		private function createConstructFunc():void
@@ -1042,12 +523,12 @@ package org.flexlite.domCompile.compiler
 			var cb:CpCodeBlock = new CpCodeBlock;
 			cb.addEmptyLine();
 			var varName:String = KeyWords.KW_THIS;
-			addAttributesToCodeBlock(cb,varName,currentSkin);
+			addAttributesToCodeBlock(cb,varName,currentXML);
 			
 			var declarations:XML;
 			
 			var noneStateIds:Array = [];
-			for each(var node:XML in currentSkin.children())
+			for each(var node:XML in currentXML.children())
 			{
 				if(node.localName()==DECLARATIONS)
 				{
@@ -1099,12 +580,12 @@ package org.flexlite.domCompile.compiler
 					}
 				}
 				elements += "]";
-				var property:String = getDefaultPropByNode(currentSkin).d;
+				var property:String = getDefaultPropByNode(currentXML).d;
 				cb.addAssignment(varName,elements,property);
 			}
 			
 			getStateNames();
-			if(stateCode.length>0&&!currentSkin.hasOwnProperty("@currentState"))
+			if(stateCode.length>0&&!currentXML.hasOwnProperty("@currentState"))
 			{
 				cb.addAssignment(varName,"\""+stateCode[0].name+"\"","currentState");
 			}
@@ -1123,9 +604,9 @@ package org.flexlite.domCompile.compiler
 			}
 			
 			//生成视图状态代码
-			createStates(currentSkin.children());
+			createStates(currentXML.children());
 			var states:Vector.<CpState>;
-			for each(var item:XML in currentSkin.attributes())
+			for each(var item:XML in currentXML.attributes())
 			{
 				var itemName:String= item.localName();
 				var index:int = itemName.indexOf(".");
@@ -1203,7 +684,7 @@ package org.flexlite.domCompile.compiler
 		private function getStateNames():void
 		{
 			var states:XMLList;
-			for each(var item:XML in currentSkin.children())
+			for each(var item:XML in currentXML.children())
 			{
 				if(item.localName()=="states")
 				{
@@ -1252,7 +733,7 @@ package org.flexlite.domCompile.compiler
 					{
 						var propertyName:String = "";
 						var parentNode:XML = node.parent() as XML;
-						if(parentNode!=null&&parentNode != currentSkin)
+						if(parentNode!=null&&parentNode != currentXML)
 							propertyName = parentNode.@id;
 						var positionObj:Object = findNearNodeId(node);
 						var stateNames:Array = [];
@@ -1303,6 +784,39 @@ package org.flexlite.domCompile.compiler
 				}
 			}
 			
+		}
+		/**
+		 * 通过视图状态名称获取对应的视图状态
+		 */		
+		private function getStateByName(name:String):Vector.<CpState>
+		{
+			var states:Vector.<CpState> = new Vector.<CpState>;
+			for each(var state:CpState in stateCode)
+			{
+				if(state.name == name)
+				{
+					if(states.indexOf(state)==-1)
+						states.push(state);
+				}
+				else if(state.stateGroups.length>0)
+				{
+					var found:Boolean = false;
+					for each(var g:String in state.stateGroups)
+					{
+						if(g==name)
+						{
+							found = true;
+							break;
+						}
+					}
+					if(found)
+					{
+						if(states.indexOf(state)==-1)
+							states.push(state);
+					}
+				}
+			}
+			return states;
 		}
 		/**
 		 * 寻找节点的临近节点ID和位置
@@ -1367,6 +881,184 @@ package org.flexlite.domCompile.compiler
 			}
 		}
 		
+		
+		
+		private static const FACTORY_CLASS_PACKAGE:String = "org.flexlite.domUI.core.DeferredInstanceFromFunction";
+		
+		private static const FACTORY_CLASS:String = "DeferredInstanceFromFunction";
+		
+		private static const ADD_ITEMS_PACKAGE:String = "org.flexlite.domUI.states.AddItems";
+		
+		private static const SETPROPERTY_PACKAGE:String = "org.flexlite.domUI.states.SetProperty";
+		
+		private static const DECLARATIONS:String = "Declarations";
+		/**
+		 * 使用框架配置文件的默认命名空间 
+		 */		
+		private static const DEFAULT_NS:Array = 
+			[DXML.NS,
+				new Namespace("s","library://ns.adobe.com/flex/spark"),
+				new Namespace("mx","library://ns.adobe.com/flex/mx"),
+				new Namespace("fx","http://ns.adobe.com/mxml/2009")];
+		
+		/**
+		 * 指定的命名空间是否是默认命名空间
+		 */		
+		private static function isDefaultNs(ns:Namespace):Boolean
+		{
+			for each(var dns:Namespace in DEFAULT_NS)
+			{
+				if(ns==dns)
+					return true;
+			}
+			return false;
+		}
+		
+		/**
+		 * 根据类名获取对应的包，并自动导入相应的包
+		 */		
+		private function getPackageByNode(node:XML):String
+		{
+			var packageName:String = "";
+			var config:XML = getConfigNode(node);
+			if(config!=null)
+				packageName = config.@p;
+			if(packageName!=""&&packageName.indexOf(".")!=-1)
+			{
+				currentClass.addImport(packageName);
+			}
+			return packageName;
+		}
+		/**
+		 * 获取配置节点
+		 */		
+		private static function getConfigNode(node:XML):XML
+		{
+			var ns:Namespace = node.namespace();
+			var className:String = node.localName();
+			if(isDefaultNs(ns))
+			{
+				for each(var component:XML in configData.children())
+				{
+					if(component.@id==className)
+					{
+						return component;
+					}
+				}
+			}
+			else if(projectConfigData!=null)
+			{
+				for each(var item:XML in projectConfigData.children())
+				{
+					if(item.localName()==className&&item.namespace()==ns)
+					{
+						return item;
+					}
+				}
+			}
+			return null;
+		}
+		/**
+		 * 根据包名获取配置节点
+		 */		
+		private static function getConfigNodeByPackage(packageName:String):XML
+		{
+			for each(var component:XML in configData.children())
+			{
+				if(component.@p==packageName)
+				{
+					return component;
+				}
+			}
+			if(projectConfigData!=null)
+			{
+				for each(var item:XML in projectConfigData.children())
+				{
+					if(item.@p == packageName)
+					{
+						return item;
+					}
+				}
+			}
+			return null;
+		}
+		/**
+		 * 根据类名获取对应默认属性
+		 */
+		private static function getDefaultPropByNode(node:XML):Object
+		{
+			var config:XML = getConfigNode(node);
+			if(config==null)
+				return {d:"",array:false};
+			findProp(config);
+			return {d:config.@d,array:config.@array=="true"};
+		}
+		/**
+		 * 递归查询默认值
+		 */		
+		private static function findProp(node:XML):String
+		{
+			if(node.hasOwnProperty("@d"))
+			{
+				return node.@d;
+			}
+			
+			var superClass:String = node.@s;
+			var superNode:XML;
+			var item:XML;
+			var found:Boolean;
+			for each(item in configData.children())
+			{
+				if(item.@p==superClass)
+				{
+					superNode = item;
+					break;
+				}
+			}
+			if(!found&&projectConfigData!=null)
+			{
+				for each(item in projectConfigData.children())
+				{
+					if(item.@p==superClass)
+					{
+						superNode = item;
+						break;
+					}
+				}
+			}
+			if(superNode!=null)
+			{
+				var prop:String = findProp(superNode);
+				if(prop!="")
+				{
+					node.@d = prop;
+					if(superNode.hasOwnProperty("@array"))
+						node.@array = superNode.@array;
+				}
+			}
+			return node.@d;
+		}
+		/**
+		 * 检查变量是否是包名
+		 */		
+		private function isPackageName(name:String):Boolean
+		{
+			return name.indexOf(".")!=-1;
+		}
+		/**
+		 * 指定的变量名是否是工程默认包里的类名
+		 */		
+		private static function isDefaultPackageClass(name:String):Boolean
+		{
+			if(projectConfigData==null||name=="")
+				return false;
+			for each(var item:XML in projectConfigData.children())
+			{
+				if(item.@p == name)
+					return true;
+			}
+			return false;
+		}
 	}
 }
 

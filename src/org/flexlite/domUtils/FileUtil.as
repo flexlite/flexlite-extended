@@ -25,10 +25,12 @@ package org.flexlite.domUtils
 			{//如果存在，先删除，防止出现文件名大小写不能覆盖的问题
 				deletePath(file.nativePath);
 			}
+			if(file.isDirectory)
+				return false;
 			var fs:FileStream = new FileStream;
-			fs.open(file,FileMode.WRITE);
 			try
 			{
+				fs.open(file,FileMode.WRITE);
 				if(data is ByteArray)
 				{
 					fs.writeBytes(data as ByteArray);
