@@ -950,7 +950,7 @@ package org.flexlite.domCompile.compiler
 			{
 				for each(var item:XML in projectConfigData.children())
 				{
-					if(item.localName()==className&&item.namespace()==ns)
+					if(item.localName()==className&&item.namespace().uri==ns.uri)
 					{
 						return item;
 					}
