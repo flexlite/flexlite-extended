@@ -948,9 +948,11 @@ package org.flexlite.domCompile.compiler
 			}
 			else if(projectConfigData!=null)
 			{
+				var p:String = ns.uri;
+				p = p.substring(0,p.length-1)+className;
 				for each(var item:XML in projectConfigData.children())
 				{
-					if(item.localName()==className&&item.namespace().uri==ns.uri)
+					if(item.@p==p)
 					{
 						return item;
 					}
