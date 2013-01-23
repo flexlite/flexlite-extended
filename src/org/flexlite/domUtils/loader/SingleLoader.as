@@ -179,7 +179,8 @@ package org.flexlite.domUtils.loader
 						var linkNameList:Vector.<String> = tmpAppDomain.getQualifiedDefinitionNames();
 						for each(var linkname:String in linkNameList)
 						{
-							keyList.push(linkname);
+							if (linkname.indexOf("_fla::") < 0 && linkname.indexOf(".") < 0)
+								keyList.push(linkname);
 						}
 						var tmpClassData:Class;
 						for each (var linkName:String in linkNameList)
