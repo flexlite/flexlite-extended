@@ -387,7 +387,7 @@ package org.flexlite.domUtils
 		/**
 		 * 转换url中的反斜杠为斜杠
 		 */
-		private static function escapeUrl(url:String):String
+		public static function escapeUrl(url:String):String
 		{
 			return url.split("\\").join("/");
 		}
