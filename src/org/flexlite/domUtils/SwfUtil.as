@@ -328,13 +328,17 @@ package org.flexlite.domUtils
 		private static function getTags(swf:SWF,tagId:uint,tags:Array):void
 		{
 			var tag:ITag;
+			var found:Boolean = false;
 			for each(tag in swf.tags)
 			{
 				if(tag is IDefinitionTag&&IDefinitionTag(tag).characterId==tagId)
 				{
+					found = true;
 					break;
 				}
 			}
+			if(!found)
+				return;
 			var childTag:ITag;
 			if(tag is TagDefineSprite)
 			{
