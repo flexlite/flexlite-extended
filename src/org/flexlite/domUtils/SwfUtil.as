@@ -1,12 +1,14 @@
 package org.flexlite.domUtils
 {
 	import com.codeazur.as3swf.SWF;
+	import com.codeazur.as3swf.data.SWFColorTransform;
 	import com.codeazur.as3swf.data.SWFFillStyle;
 	import com.codeazur.as3swf.data.SWFMatrix;
 	import com.codeazur.as3swf.data.SWFShapeRecord;
 	import com.codeazur.as3swf.data.SWFShapeRecordStyleChange;
 	import com.codeazur.as3swf.data.SWFShapeWithStyle;
 	import com.codeazur.as3swf.data.SWFSymbol;
+	import com.codeazur.as3swf.data.filters.IFilter;
 	import com.codeazur.as3swf.tags.IDefinitionTag;
 	import com.codeazur.as3swf.tags.ITag;
 	import com.codeazur.as3swf.tags.TagDefineBits;
@@ -21,11 +23,13 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.TagMetadata;
 	import com.codeazur.as3swf.tags.TagPlaceObject;
 	import com.codeazur.as3swf.tags.TagPlaceObject2;
+	import com.codeazur.as3swf.tags.TagPlaceObject3;
 	import com.codeazur.as3swf.tags.TagSetBackgroundColor;
 	import com.codeazur.as3swf.tags.TagShowFrame;
 	import com.codeazur.as3swf.tags.TagSymbolClass;
 	import com.codeazur.as3swf.timeline.Frame;
 	
+	import flash.geom.ColorTransform;
 	import flash.utils.ByteArray;
 	
 	/**
@@ -220,8 +224,36 @@ package org.flexlite.domUtils
 					continue;
 				var symbol:SWFSymbol = new SWFSymbol();
 				symbol.name = symbols[i];
-				tag = swf.getCharacter(placeTag.characterId);
-				if(tag is TagDefineShape)
+				index = 0;
+				while(index<tags.length)
+				{
+					tag = tags[index];
+					if(tag is IDefinitionTag&&IDefinitionTag(tag).characterId==placeTag.characterId)
+					{
+						break;
+					}
+					index++;
+				}
+				if(!(tag is TagDefineShape)&&!(tag is TagDefineSprite))
+					continue;
+				var hasCT:Boolean = hasColorTransform(placeTag.colorTransform);
+				var numChildren:int = 0;
+				var childIndex:int = -1;
+				if(tag is TagDefineSprite)
+				{
+					index = 0;
+					while(index<TagDefineSprite(tag).tags.length)
+					{
+						if(TagDefineSprite(tag).tags[index] is TagPlaceObject)
+						{
+							if(childIndex==-1)
+								childIndex = index;
+							numChildren++;
+						}
+						index++;
+					}
+				}
+				if(tag is TagDefineShape||hasCT)
 				{
 					var spriteTag:TagDefineSprite = new TagDefineSprite();
 					spriteTag.characterId = tags.length-2;
@@ -229,8 +261,24 @@ package org.flexlite.domUtils
 					place.hasCharacter = true;
 					place.hasMatrix = true;
 					place.depth = 1;
-					place.characterId = placeTag.characterId;
-					place.matrix = new SWFMatrix();
+					if(numChildren==1)
+					{
+						var childPlace:TagPlaceObject = TagDefineSprite(tag).tags[childIndex] as TagPlaceObject;
+						place.characterId = childPlace.characterId
+						place.matrix = childPlace.matrix.clone();
+					}
+					else
+					{
+						place.characterId = placeTag.characterId;
+						place.matrix = new SWFMatrix();
+					}
+					
+					if(hasCT)
+					{
+						place.hasColorTransform = true;
+						place.colorTransform = placeTag.colorTransform.clone();
+						place.colorTransform.aMult = 256;
+					}
 					spriteTag.tags.push(place);
 					spriteTag.tags.push(new TagShowFrame());
 					spriteTag.tags.push(new TagEnd());
@@ -248,7 +296,20 @@ package org.flexlite.domUtils
 				return null;
 			tags.splice(tags.length-2,0,symbolTag);
 			return extractFromSwf(swf,symbols);
+			
+			function hasColorTransform(ct:SWFColorTransform):Boolean
+			{
+				if(!ct)
+					return false;
+				if(ct.rMult==256&&ct.gMult==256&&ct.bMult==256&&
+					ct.rAdd==0&&ct.gAdd==0&&ct.bAdd==0&&ct.aAdd==0)
+				{
+					return false;
+				}
+				return true;
+			}
 		}
+		
 		/**
 		 * 根据导出类名列表，从一个SWF文件字节流里提取对应素材,合并成一个新的SWF文件,
 		 * 若所有类名都不存在，返回null。注意:导出swf的舞台上不含有任何显示对象。
