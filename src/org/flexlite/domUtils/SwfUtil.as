@@ -11,6 +11,7 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.ITag;
 	import com.codeazur.as3swf.tags.TagDefineBits;
 	import com.codeazur.as3swf.tags.TagDefineBitsLossless;
+	import com.codeazur.as3swf.tags.TagDefineScalingGrid;
 	import com.codeazur.as3swf.tags.TagDefineSceneAndFrameLabelData;
 	import com.codeazur.as3swf.tags.TagDefineShape;
 	import com.codeazur.as3swf.tags.TagDefineSprite;
@@ -317,9 +318,17 @@ package org.flexlite.domUtils
 			newSwf.publish(newBytes);
 			return newBytes;
 			
-			function compareFunction(tagA:ITag,tagB:ITag):int
+			function compareFunction(tagA:IDefinitionTag,tagB:IDefinitionTag):int
 			{
-				return tagA["characterId"]-tagB["characterId"];
+				var result:int = tagA.characterId-tagB.characterId;
+				if(result==0)
+				{
+					if(tagA is TagDefineScalingGrid&&!(tagB is TagDefineScalingGrid))
+						result = 1;
+					else if(!(tagA is TagDefineScalingGrid)&&tagB is TagDefineScalingGrid)
+						result = -1;
+				}
+				return result;
 			}
 		}
 		/**
@@ -328,21 +337,30 @@ package org.flexlite.domUtils
 		private static function getTags(swf:SWF,tagId:uint,tags:Array):void
 		{
 			var tag:ITag;
-			var found:Boolean = false;
+			var defineTag:IDefinitionTag;
+			var scale9Tag:TagDefineScalingGrid;
 			for each(tag in swf.tags)
 			{
-				if(tag is IDefinitionTag&&IDefinitionTag(tag).characterId==tagId)
+				if(!defineTag)
 				{
-					found = true;
-					break;
+					if(tag is IDefinitionTag&&IDefinitionTag(tag).characterId==tagId)
+						defineTag = tag as IDefinitionTag;
+				}
+				else
+				{
+					if(tag is TagDefineScalingGrid&&TagDefineScalingGrid(tag).characterId==tagId)
+					{
+						scale9Tag = tag as TagDefineScalingGrid;
+						break;
+					}
 				}
 			}
-			if(!found)
+			if(!defineTag)
 				return;
 			var childTag:ITag;
-			if(tag is TagDefineSprite)
+			if(defineTag is TagDefineSprite)
 			{
-				for each(childTag in (tag as TagDefineSprite).tags)
+				for each(childTag in (defineTag as TagDefineSprite).tags)
 				{
 					if(childTag is TagPlaceObject)
 					{
@@ -350,9 +368,9 @@ package org.flexlite.domUtils
 					}
 				}
 			}
-			else if(tag is TagDefineShape)
+			else if(defineTag is TagDefineShape)
 			{
-				var shapes:SWFShapeWithStyle = TagDefineShape(tag).shapes;
+				var shapes:SWFShapeWithStyle = TagDefineShape(defineTag).shapes;
 				var fillStyle:SWFFillStyle;
 				for each(fillStyle in shapes.initialFillStyles)
 				{
@@ -370,8 +388,10 @@ package org.flexlite.domUtils
 					}
 				}
 			}
-			if(tags.indexOf(tag)==-1)
-				tags.push(tag);
+			if(tags.indexOf(defineTag)==-1)
+				tags.push(defineTag);
+			if(scale9Tag&&tags.indexOf(scale9Tag)==-1)
+				tags.push(scale9Tag);
 			
 			function checkSwfFillStyle(fillStyle:SWFFillStyle,swf:SWF,tags:Array):void
 			{
@@ -379,7 +399,7 @@ package org.flexlite.domUtils
 				if(type==0x40||type==0x41||type==0x42||type==0x43)
 				{
 					childTag = swf.getCharacter(fillStyle.bitmapId);
-					if(childTag)
+					if(childTag&&tags.indexOf(childTag)==-1)
 						tags.push(childTag);
 				}
 			}
