@@ -1,6 +1,7 @@
 package org.flexlite.domUtils
 {
 	import flash.system.ApplicationDomain;
+	import flash.utils.ByteArray;
 	
 	import org.flexlite.domUtils.loader.MultiLoader;
 	import org.flexlite.domUtils.loader.MultiURLLoader;
@@ -131,6 +132,19 @@ package org.flexlite.domUtils
 		{
 			var rootLoader:RootLoader = new RootLoader;
 			rootLoader.loadRoot(url,onComp,onProgress,onIoError);
+		}
+		/**
+		 * 从字节流加载Loader显示对象
+		 * @param bytes 文件的字节流对象
+		 * @param onComp 返回结果时的回调函数 onComp(data:Loader)
+		 * @param onProgress 加载进度回调函数 onProgress(event:ProgressEvent)
+		 * @param onIoError 加载失败回调函数 onIoError(event:IOErrorEvent)
+		 * @param appDomain 加载使用的程序域
+		 */	
+		public static function loadLoaderFromBytes(bytes:ByteArray,onComp:Function,onProgress:Function=null,onIoError:Function=null,appDomain:ApplicationDomain=null):void
+		{
+			var loader:SingleLoader = new SingleLoader();
+			loader.loadLoaderFromBytes(bytes,onComp,onProgress,onIoError,appDomain);
 		}
 		
 		//==========单个加载项=========end=========
