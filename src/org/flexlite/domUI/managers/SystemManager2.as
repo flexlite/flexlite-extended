@@ -44,6 +44,9 @@ package org.flexlite.domUI.managers
 		 */		
 		private function onRemoved(event:Event):void
 		{
+			var index:int = DomGlobals._systemManagers.indexOf(this);
+			if(index!=-1)
+				DomGlobals._systemManagers.splice(index,1);
 			removeEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, true);
 			removeEventListener(MouseEvent.MOUSE_WHEEL, mouseEventHandler, true);
 			removeEventListener(MouseEvent.MOUSE_DOWN, mouseEventHandler, true);
@@ -58,7 +61,9 @@ package org.flexlite.domUI.managers
 		private function onAddToStage(event:Event=null):void
 		{
 			stage.stageFocusRect=false;
-			DomGlobals._systemManager = this;
+			var index:int = DomGlobals._systemManagers.indexOf(this);
+			if(index==-1)
+				DomGlobals._systemManagers.push(this);
 			addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, true, 1000);
 			addEventListener(MouseEvent.MOUSE_WHEEL, mouseEventHandler, true, 1000);
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseEventHandler, true, 1000);
