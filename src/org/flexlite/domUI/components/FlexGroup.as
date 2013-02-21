@@ -1,8 +1,11 @@
 package org.flexlite.domUI.components
 {
 	import flash.display.DisplayObject;
+	import flash.text.TextField;
 	
+	import mx.core.IIMESupport;
 	import mx.core.UIComponent;
+	import mx.managers.IFocusManagerComponent;
 	
 	import org.flexlite.domCore.dx_internal;
 	import org.flexlite.domUI.core.IVisualElement;
@@ -24,7 +27,7 @@ package org.flexlite.domUI.components
 	 * FlexLite组件在Flex中运行的容器包装器
 	 * @author DOM
 	 */
-	public class FlexGroup extends UIComponent
+	public class FlexGroup extends UIComponent implements IFocusManagerComponent,IIMESupport
 	{
 		/**
 		 * 构造函数
@@ -37,6 +40,22 @@ package org.flexlite.domUI.components
 			contentGroup.addEventListener(
 				ElementExistenceEvent.ELEMENT_REMOVE, contentGroup_elementRemovedHandler);
 			super.addChild(contentGroup);
+		}
+		
+		public function get enableIME():Boolean
+		{
+			return stage?stage.focus is TextField:false;
+		}
+		
+		private var _imeMode:String = null;
+		
+		public function get imeMode():String
+		{
+			return _imeMode;
+		}
+		public function set imeMode(value:String):void
+		{
+			_imeMode = value;
 		}
 		
 		/**
