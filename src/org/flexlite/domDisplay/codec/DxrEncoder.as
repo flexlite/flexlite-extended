@@ -13,6 +13,9 @@ package org.flexlite.domDisplay.codec
 	import org.flexlite.domCore.Injector;
 	import org.flexlite.domCore.dx_internal;
 	import org.flexlite.domDisplay.DxrData;
+	import org.flexlite.domDisplay.image.Jpeg32Encoder;
+	import org.flexlite.domDisplay.image.JpegXREncoder;
+	import org.flexlite.domDisplay.image.PngEncoder;
 	import org.flexlite.domUtils.CRC32Util;
 	
 	use namespace dx_internal;
@@ -29,6 +32,25 @@ package org.flexlite.domDisplay.codec
 		 */		
 		public function DxrEncoder()
 		{
+			if(!injected)
+			{
+				injected = true;
+				doInject();
+			}
+		}
+		
+		private static var injected:Boolean = false;
+		/**
+		 * 执行位图解码器注入
+		 */		
+		private static function doInject():void
+		{
+			if(!Injector.hasMapRule(IBitmapEncoder,"png"))
+				Injector.mapClass(IBitmapEncoder,PngEncoder,"png");
+			if(!Injector.hasMapRule(IBitmapEncoder,"jpegxr"))
+				Injector.mapClass(IBitmapEncoder,JpegXREncoder,"jpegxr");
+			if(!Injector.hasMapRule(IBitmapEncoder,"jpeg32"))
+				Injector.mapClass(IBitmapEncoder,Jpeg32Encoder,"jpeg32");
 		}
 		/**
 		 * 默认位图编解码器标识符
