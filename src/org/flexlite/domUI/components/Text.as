@@ -250,7 +250,7 @@ package org.flexlite.domUI.components
 		
 		private var _textColor:uint=0x000000;
 		/**
-		 * 文字颜色,默认值为0x000000。
+		 * @inheritDoc
 		 */
 		public function get textColor():uint
 		{
@@ -269,7 +269,7 @@ package org.flexlite.domUI.components
 		 */		
 		private var fontLookup:String = FontLookup.DEVICE;
 		
-		private var _fontFamily:String="Arial";
+		private var _fontFamily:String="SimSun";
 		/**
 		 * 字体名称。默认值：Arial
 		 */	
