@@ -389,7 +389,7 @@ package org.flexlite.domUtils
 		 */
 		public static function escapeUrl(url:String):String
 		{
-			return url.split("\\").join("/");
+			return Boolean(!url)?"":url.split("\\").join("/");
 		}
 	}
 }
