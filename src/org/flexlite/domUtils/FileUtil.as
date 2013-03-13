@@ -21,7 +21,7 @@ package org.flexlite.domUtils
 		public static function save(path:String,data:Object):Boolean
 		{
 			path = escapeUrl(path);
-			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(path);
 			if(file.exists)
 			{//如果存在，先删除，防止出现文件名大小写不能覆盖的问题
 				deletePath(file.nativePath);
@@ -61,7 +61,7 @@ package org.flexlite.domUtils
 		public static function open(path:String):FileStream
 		{
 			path = escapeUrl(path);
-			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(path);
 			var fs:FileStream = new FileStream;
 			try
 			{
@@ -155,7 +155,7 @@ package org.flexlite.domUtils
 			defaultPath = escapeUrl(defaultPath);
 			var file:File
 			if(defaultPath!=null)
-				file = new File(File.applicationDirectory.resolvePath(defaultPath).nativePath);
+				file = File.applicationDirectory.resolvePath(defaultPath);
 			else
 				file = new File;
 			file.addEventListener(Event.SELECT,function(e:Event):void{
@@ -175,7 +175,7 @@ package org.flexlite.domUtils
 			defaultPath = escapeUrl(defaultPath);
 			var file:File
 			if(defaultPath!=null)
-				file = new File(File.applicationDirectory.resolvePath(defaultPath).nativePath);
+				file = File.applicationDirectory.resolvePath(defaultPath);
 			else
 				file = new File;
 			file.addEventListener(Event.SELECT,function(e:Event):void{
@@ -194,8 +194,8 @@ package org.flexlite.domUtils
 		{
 			source = escapeUrl(source);
 			dest = escapeUrl(dest);
-			var file:File = new File(File.applicationDirectory.resolvePath(source).nativePath);
-			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(source);
+			var destFile:File = File.applicationDirectory.resolvePath(dest);
 			try
 			{
 				file.moveTo(destFile,overwrite);
@@ -217,8 +217,8 @@ package org.flexlite.domUtils
 		{
 			source = escapeUrl(source);
 			dest = escapeUrl(dest);
-			var file:File = new File(File.applicationDirectory.resolvePath(source).nativePath);
-			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(source);
+			var destFile:File = File.applicationDirectory.resolvePath(dest);
 			try
 			{
 				file.copyTo(destFile,overwrite);
@@ -238,7 +238,7 @@ package org.flexlite.domUtils
 		public static function deletePath(path:String,moveToTrash:Boolean = false):Boolean
 		{
 			path = escapeUrl(path);
-			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(path);
 			if(moveToTrash)
 			{
 				try
@@ -316,10 +316,11 @@ package org.flexlite.domUtils
 		public static function search(dir:String,extension:String=null,filterFunc:Function=null):Array
 		{
 			dir = escapeUrl(dir);
-			var file:File = new File(File.applicationDirectory.resolvePath(dir).nativePath);
+			var file:File = File.applicationDirectory.resolvePath(dir);
 			var result:Array = [];
 			if(!file.isDirectory)
 				return result;
+			extension = extension?extension.toLowerCase():"";
 			findFiles(file,result,extension,filterFunc);
 			return result;
 		}
@@ -353,9 +354,9 @@ package org.flexlite.domUtils
 						result.push(file);
 					}
 				}
-				else if(extension!=null)
+				else if(extension&&file.extension)
 				{
-					if(file.extension == extension)
+					if(file.extension.toLowerCase() == extension)
 					{
 						result.push(file);
 					}
