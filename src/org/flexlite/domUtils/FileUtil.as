@@ -361,10 +361,6 @@ package org.flexlite.domUtils
 						result.push(file);
 					}
 				}
-				else
-				{
-					result.push(file);
-				}
 			}
 		}
 		
