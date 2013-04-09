@@ -304,9 +304,10 @@ package org.flexlite.domCompile.compiler
 				case "Boolean":
 				case "Class":
 					returnValue = node.toString();
+					returnValue = StringUtil.trim(returnValue);
 					break;
 				case "Number":
-					returnValue = node.toString();
+					returnValue = StringUtil.trim(node.toString());
 					if(returnValue.indexOf("%")!=-1)
 						returnValue = returnValue.substring(0,returnValue.length-1);
 					break;
@@ -455,6 +456,8 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private function formatValue(key:String,value:String,id:String):String
 		{
+			var stringValue:String = value;//除了字符串，其他类型都去除两端多余空格。
+			value = StringUtil.trim(value);
 			var index:int = value.indexOf("@Embed(");
 			if(index!=-1)
 			{
@@ -470,12 +473,12 @@ package org.flexlite.domCompile.compiler
 				}
 				else
 				{
-					value = formatString(value);
+					value = formatString(stringValue);
 				}
 			}
 			else if(isStringKey(key))
 			{
-				value = formatString(value);
+				value = formatString(stringValue);
 			}
 			else if(value.indexOf("{")!=-1)
 			{
@@ -484,6 +487,7 @@ package org.flexlite.domCompile.compiler
 			else if(value.indexOf("%")!=-1
 				&&(key=="width"||key=="height"))
 			{
+				value = StringUtil.trim(value);
 				value = Number(value.substr(0,value.length-1)).toString();
 			}
 			else if(value.indexOf("#")==0)
@@ -492,7 +496,7 @@ package org.flexlite.domCompile.compiler
 			}
 			else if(isNaN(Number(value))&&value!="true"&&value!="false")
 			{
-				value = formatString(value);
+				value = formatString(stringValue);
 			}
 			return value;
 		}
