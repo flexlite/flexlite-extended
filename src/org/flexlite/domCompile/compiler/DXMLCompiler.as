@@ -473,7 +473,8 @@ package org.flexlite.domCompile.compiler
 			{
 				value = value.substr(1,value.length-2);
 			}
-			else if(value.indexOf("%")!=-1)
+			else if(value.indexOf("%")==value.length-1
+				&&(key=="width"||key=="height"))
 			{
 				value = Number(value.substr(0,value.length-1)).toString();
 			}
