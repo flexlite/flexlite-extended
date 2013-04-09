@@ -302,9 +302,13 @@ package org.flexlite.domCompile.compiler
 				case "uint":
 				case "int":
 				case "Boolean":
-				case "Number":
 				case "Class":
 					returnValue = node.toString();
+					break;
+				case "Number":
+					returnValue = node.toString();
+					if(returnValue.indexOf("%")==returnValue.length-1)
+						returnValue = returnValue.substring(0,returnValue.length-1);
 					break;
 				case "String":
 					returnValue = formatString(node.toString());
@@ -360,7 +364,11 @@ package org.flexlite.domCompile.compiler
 						prop = child.localName();
 						childFunc = createFuncForNode(child.children()[0]);
 						if(childFunc!=""&&!isStateNode(child))
+						{
+							if(childFunc.indexOf("()")==-1)
+								prop = formatKey(prop,childFunc);
 							cb.addAssignment(varName,childFunc,prop);
+						}
 					}
 					else
 					{
