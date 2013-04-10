@@ -21,7 +21,7 @@ package org.flexlite.domUtils
 		public static function save(path:String,data:Object):Boolean
 		{
 			path = escapeUrl(path);
-			var file:File = File.applicationDirectory.resolvePath(path);
+			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			if(file.exists)
 			{//如果存在，先删除，防止出现文件名大小写不能覆盖的问题
 				deletePath(file.nativePath);
@@ -61,7 +61,7 @@ package org.flexlite.domUtils
 		public static function open(path:String):FileStream
 		{
 			path = escapeUrl(path);
-			var file:File = File.applicationDirectory.resolvePath(path);
+			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			var fs:FileStream = new FileStream;
 			try
 			{
@@ -195,7 +195,8 @@ package org.flexlite.domUtils
 			source = escapeUrl(source);
 			dest = escapeUrl(dest);
 			var file:File = File.applicationDirectory.resolvePath(source);
-			var destFile:File = File.applicationDirectory.resolvePath(dest);
+			//必须创建绝对位置的File才能移动成功。
+			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
 			try
 			{
 				file.moveTo(destFile,overwrite);
@@ -218,7 +219,8 @@ package org.flexlite.domUtils
 			source = escapeUrl(source);
 			dest = escapeUrl(dest);
 			var file:File = File.applicationDirectory.resolvePath(source);
-			var destFile:File = File.applicationDirectory.resolvePath(dest);
+			//必须创建绝对位置的File才能移动成功。
+			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
 			try
 			{
 				file.copyTo(destFile,overwrite);
@@ -238,7 +240,7 @@ package org.flexlite.domUtils
 		public static function deletePath(path:String,moveToTrash:Boolean = false):Boolean
 		{
 			path = escapeUrl(path);
-			var file:File = File.applicationDirectory.resolvePath(path);
+			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			if(moveToTrash)
 			{
 				try
