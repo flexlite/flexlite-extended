@@ -630,6 +630,7 @@ package org.flexlite.domCompile.compiler
 			//打印视图状态初始化代码
 			if(stateCode.length>0)
 			{
+				currentClass.addImport(STATE_CLASS_PACKAGE);
 				cb.addCodeLine("states = [");
 				var first:Boolean = true;
 				var indentStr:String = "	";
@@ -870,6 +871,8 @@ package org.flexlite.domCompile.compiler
 		private static const FACTORY_CLASS_PACKAGE:String = "org.flexlite.domUI.core.DeferredInstanceFromFunction";
 		
 		private static const FACTORY_CLASS:String = "DeferredInstanceFromFunction";
+		
+		private static const STATE_CLASS_PACKAGE:String = "org.flexlite.domUI.states.State";
 		
 		private static const ADD_ITEMS_PACKAGE:String = "org.flexlite.domUI.states.AddItems";
 		
