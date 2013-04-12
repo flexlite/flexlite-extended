@@ -106,11 +106,6 @@ package org.flexlite.domCompile.compiler
 			addIds(currentXML.children());
 			
 			createConstructFunc();
-			
-			for each(var node:XML in currentXML.children())
-			{
-				createFuncForNode(node);
-			}
 		}
 		
 		/**
@@ -244,14 +239,9 @@ package org.flexlite.domCompile.compiler
 			addAttributesToCodeBlock(cb,varName,node);
 			
 			var children:XMLList = node.children();
-			var property:String = "";
-			var isArray:Boolean = false;
-			if(property=="")
-			{
-				var obj:Object = getDefaultPropByNode(node);
-				property = obj.d;
-				isArray = obj.array;
-			}
+			var obj:Object = getDefaultPropByNode(node);
+			var property:String = obj.d;
+			var isArray:Boolean = obj.array;
 			
 			initlizeChildNode(cb,children,property,isArray,varName);
 			
@@ -290,9 +280,9 @@ package org.flexlite.domCompile.compiler
 				case "Vector":
 					var values:Array = [];
 					for each(child in node.children())
-					{
-						values.push(createFuncForNode(child));
-					}
+				{
+					values.push(createFuncForNode(child));
+				}
 					returnValue = "["+values.join(",")+"]";
 					if(className=="Vector")
 					{
@@ -349,64 +339,80 @@ package org.flexlite.domCompile.compiler
 		private function initlizeChildNode(cb:CpCodeBlock,children:XMLList,
 										   property:String,isArray:Boolean,varName:String):void
 		{
+			if(children.length()==0)
+				return;
 			var child:XML;
 			var childFunc:String = "";
-			if(children.length()>0)
+			var directChild:Array = [];
+			var prop:String = "";
+			for each(child in children)
 			{
-				
-				var directChild:Array = [];
-				var prop:String = "";
-				for each(child in children)
+				prop = child.localName(); 
+				if(prop==DECLARATIONS||prop=="states")
 				{
-					if(isProperty(child))
+					continue;
+				}
+				if(isProperty(child))
+				{
+					var childLength:int = child.children().length();
+					if(childLength==0)
+						continue;
+					
+					if(childLength>1)
 					{
-						if(child.children().length()==0)
-							continue;
-						prop = child.localName();
-						childFunc = createFuncForNode(child.children()[0]);
-						if(childFunc!=""&&!isStateNode(child))
+						var values:Array = [];
+						for each(var item:XML in child.children())
 						{
-							if(childFunc.indexOf("()")==-1)
-								prop = formatKey(prop,childFunc);
-							cb.addAssignment(varName,childFunc,prop);
+							values.push(createFuncForNode(item));
 						}
+						childFunc = "["+values.join(",")+"]";
 					}
 					else
 					{
-						directChild.push(child);
+						childFunc = createFuncForNode(child.children()[0]);
 					}
-					
-				}
-				if(directChild.length==0)
-					return;
-				if(isArray&&(directChild.length>1||directChild[0].localName()!="Array"))
-				{
-					var arrValue:String = "[";
-					var isFirst:Boolean = true;
-					for each(child in directChild)
+					if(childFunc!=""&&!isStateNode(child))
 					{
-						childFunc = createFuncForNode(child);
-						if(childFunc==""||isStateNode(child))
-							continue;
-						if(isFirst)
-						{
-							arrValue += childFunc;
-							isFirst = false;
-						}
-						else
-						{
-							arrValue += ","+childFunc;
-						}
+						if(childFunc.indexOf("()")==-1)
+							prop = formatKey(prop,childFunc);
+						cb.addAssignment(varName,childFunc,prop);
 					}
-					arrValue += "]";
-					cb.addAssignment(varName,arrValue,property);
 				}
 				else
 				{
-					childFunc = createFuncForNode(directChild[0]);
-					if(childFunc!=""&&!isStateNode(child))
-						cb.addAssignment(varName,childFunc,property);
+					directChild.push(child);
 				}
+				
+			}
+			if(directChild.length==0)
+				return;
+			if(isArray&&(directChild.length>1||directChild[0].localName()!="Array"))
+			{
+				var arrValue:String = "[";
+				var isFirst:Boolean = true;
+				for each(child in directChild)
+				{
+					childFunc = createFuncForNode(child);
+					if(childFunc==""||isStateNode(child))
+						continue;
+					if(isFirst)
+					{
+						arrValue += childFunc;
+						isFirst = false;
+					}
+					else
+					{
+						arrValue += ","+childFunc;
+					}
+				}
+				arrValue += "]";
+				cb.addAssignment(varName,arrValue,property);
+			}
+			else
+			{
+				childFunc = createFuncForNode(directChild[0]);
+				if(childFunc!=""&&!isStateNode(child))
+					cb.addAssignment(varName,childFunc,property);
 			}
 		}
 		
@@ -538,29 +544,20 @@ package org.flexlite.domCompile.compiler
 			var varName:String = KeyWords.KW_THIS;
 			addAttributesToCodeBlock(cb,varName,currentXML);
 			
+			var obj:Object = getDefaultPropByNode(currentXML);
+			var property:String = obj.d;
+			var isArray:Boolean = obj.array;
+			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
+			
 			var declarations:XML;
 			
-			var noneStateIds:Array = [];
 			for each(var node:XML in currentXML.children())
 			{
 				if(node.localName()==DECLARATIONS)
 				{
 					declarations = node;
-					continue;
+					break;
 				}
-				if(isProperty(node))
-				{
-					if(node.localName()!="states")
-					{
-						initlizeChildNode(cb,node.children(),node.localName(),false,varName);
-					}
-					continue;
-				}
-				
-				if(getPackageByNode(node)=="")
-					continue;
-				if(!isStateNode(node))
-					noneStateIds.push(node.@id);
 			}
 			
 			if(declarations&&declarations.children().length()>0)
@@ -575,35 +572,9 @@ package org.flexlite.domCompile.compiler
 				}
 			}
 			
-			var id:String;
-			if(noneStateIds.length>0)
-			{
-				var elements:String = "[";
-				var isFirst:Boolean = true;
-				for each(id in noneStateIds)
-				{
-					if(isFirst)
-					{
-						elements += id+"_i()";
-						isFirst = false;
-					}
-					else
-					{
-						elements += ","+id+"_i()";
-					}
-				}
-				elements += "]";
-				var property:String = getDefaultPropByNode(currentXML).d;
-				cb.addAssignment(varName,elements,property);
-			}
-			
 			getStateNames();
-			if(stateCode.length>0&&!currentXML.hasOwnProperty("@currentState"))
-			{
-				cb.addAssignment(varName,"\""+stateCode[0].name+"\"","currentState");
-			}
 			cb.addEmptyLine();
-			
+			var id:String;
 			if(stateIds.length>0)
 			{
 				currentClass.addImport(FACTORY_CLASS_PACKAGE);
@@ -633,7 +604,7 @@ package org.flexlite.domCompile.compiler
 					if(states.length>0)
 					{
 						for each(var state:CpState in states)
-							state.addOverride(new CpSetProperty("",key,itemValue));
+						state.addOverride(new CpSetProperty("",key,itemValue));
 					}
 				}
 			}
@@ -763,15 +734,15 @@ package org.flexlite.domCompile.compiler
 									stateNames.push(state.name);
 							}
 						}
-							
+						
 						for each(stateName in stateNames)
 						{
 							states = getStateByName(stateName);
 							if(states.length>0)
 							{
 								for each(state in states)
-									state.addOverride(new CpAddItems(id+"_factory",propertyName,
-										positionObj.position,positionObj.relativeTo));
+								state.addOverride(new CpAddItems(id+"_factory",propertyName,
+									positionObj.position,positionObj.relativeTo));
 							}
 						}
 					}
@@ -790,7 +761,7 @@ package org.flexlite.domCompile.compiler
 							if(states.length>0)
 							{
 								for each(state in states)
-									state.addOverride(new CpSetProperty(id,key,value));
+								state.addOverride(new CpSetProperty(id,key,value));
 							}
 						}
 					}
@@ -948,6 +919,8 @@ package org.flexlite.domCompile.compiler
 		private static function getConfigNode(node:XML):XML
 		{
 			var ns:Namespace = node.namespace();
+			if(!ns)
+				return null;
 			var className:String = node.localName();
 			if(isDefaultNs(ns))
 			{
