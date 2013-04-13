@@ -544,13 +544,7 @@ package org.flexlite.domCompile.compiler
 			var varName:String = KeyWords.KW_THIS;
 			addAttributesToCodeBlock(cb,varName,currentXML);
 			
-			var obj:Object = getDefaultPropByNode(currentXML);
-			var property:String = obj.d;
-			var isArray:Boolean = obj.array;
-			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
-			
 			var declarations:XML;
-			
 			for each(var node:XML in currentXML.children())
 			{
 				if(node.localName()==DECLARATIONS)
@@ -559,7 +553,6 @@ package org.flexlite.domCompile.compiler
 					break;
 				}
 			}
-			
 			if(declarations&&declarations.children().length()>0)
 			{
 				for each(var decl:XML in declarations.children())
@@ -571,6 +564,11 @@ package org.flexlite.domCompile.compiler
 					}
 				}
 			}
+			
+			var obj:Object = getDefaultPropByNode(currentXML);
+			var property:String = obj.d;
+			var isArray:Boolean = obj.array;
+			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
 			
 			getStateNames();
 			cb.addEmptyLine();
