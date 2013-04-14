@@ -358,7 +358,7 @@ package org.flexlite.domCompile.compiler
 					if(childLength==0)
 						continue;
 					
-					if(childLength>1)
+					if(childLength>1||(prop==property&&isArray))
 					{
 						var values:Array = [];
 						for each(var item:XML in child.children())
