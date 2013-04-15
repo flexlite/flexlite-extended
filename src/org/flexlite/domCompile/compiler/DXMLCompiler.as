@@ -358,7 +358,7 @@ package org.flexlite.domCompile.compiler
 					if(childLength==0)
 						continue;
 					
-					if(childLength>1||(prop==property&&isArray))
+					if(childLength>1)
 					{
 						var values:Array = [];
 						for each(var item:XML in child.children())
@@ -369,7 +369,13 @@ package org.flexlite.domCompile.compiler
 					}
 					else
 					{
-						childFunc = createFuncForNode(child.children()[0]);
+						var firsChild:XML = child.children()[0];
+						childFunc = createFuncForNode(firsChild);
+						if(firsChild.localName()!="Array"&&
+							prop==property&&isArray)
+						{
+							childFunc = "["+childFunc+"]";
+						}
 					}
 					if(childFunc!=""&&!isStateNode(child))
 					{
