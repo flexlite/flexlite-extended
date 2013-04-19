@@ -200,7 +200,7 @@ package org.flexlite.domDisplay.codec
 				index++;
 			}
 			tempBmRect = getColorRect(tempBmData);
-			if(tempBmRect.width>1&&tempBmRect.height>1)
+			if(tempBmRect.width>=1&&tempBmRect.height>=1)
 			{
 				pageData = new BitmapData(tempBmRect.width,tempBmRect.height,true,0);
 				pageData.copyPixels(tempBmData,tempBmRect,new Point(0,0),null,null,true);
