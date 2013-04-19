@@ -194,9 +194,11 @@ package org.flexlite.domUtils
 		{
 			source = escapeUrl(source);
 			dest = escapeUrl(dest);
-			var file:File = File.applicationDirectory.resolvePath(source);
+			var file:File = new File(File.applicationDirectory.resolvePath(source).nativePath);
 			//必须创建绝对位置的File才能移动成功。
 			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
+			if(destFile.exists)
+				deletePath(destFile.nativePath);
 			try
 			{
 				file.moveTo(destFile,overwrite);
@@ -221,6 +223,8 @@ package org.flexlite.domUtils
 			var file:File = File.applicationDirectory.resolvePath(source);
 			//必须创建绝对位置的File才能移动成功。
 			var destFile:File = new File(File.applicationDirectory.resolvePath(dest).nativePath);
+			if(destFile.exists)
+				deletePath(destFile.nativePath);
 			try
 			{
 				file.copyTo(destFile,overwrite);
