@@ -63,7 +63,7 @@ package org.flexlite.domUI.components
 		 */		
 		dx_internal function contentGroup_elementAddedHandler(event:ElementExistenceEvent):void
 		{
-			event.element.owner = this
+			event.element.ownerChanged(this);
 			dispatchEvent(event);
 		}
 		/**
@@ -71,7 +71,7 @@ package org.flexlite.domUI.components
 		 */		
 		dx_internal function contentGroup_elementRemovedHandler(event:ElementExistenceEvent):void
 		{
-			event.element.owner = null;
+			event.element.ownerChanged(null);
 			dispatchEvent(event);
 		}
 		/**
