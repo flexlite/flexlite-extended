@@ -55,6 +55,8 @@ package org.flexlite.domUtils
 		 */		
 		public static function replaceStr(targetStr:String,p:String,rep:String):String
 		{
+			if(!targetStr)
+				return "";
 			var arr:Array = targetStr.split(p);
 			return arr.join(rep);
 		}
