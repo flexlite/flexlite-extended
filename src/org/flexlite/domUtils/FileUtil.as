@@ -170,7 +170,7 @@ package org.flexlite.domUtils
 		 * @param onSelect 回调函数：onSelect(file:File)
 		 * @param title 对话框标题
 		 */		
-		public static function browsewAndSave(data:Object,defaultPath:String=null,title:String="保存文件"):void
+		public static function browseAndSave(data:Object,defaultPath:String=null,title:String="保存文件"):void
 		{
 			defaultPath = escapeUrl(defaultPath);
 			var file:File
