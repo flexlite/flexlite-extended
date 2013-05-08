@@ -488,13 +488,13 @@ package org.flexlite.domCompile.compiler
 					value = formatString(stringValue);
 				}
 			}
-			else if(isStringKey(key))
-			{
-				value = formatString(stringValue);
-			}
 			else if(value.indexOf("{")!=-1)
 			{
 				value = value.substr(1,value.length-2);
+			}
+			else if(isStringKey(key))
+			{
+				value = formatString(stringValue);
 			}
 			else if(value.indexOf("%")!=-1
 				&&(key=="percentHeight"||key=="percentWidth"))
