@@ -1,5 +1,6 @@
 package org.flexlite.domDisplay.utils
 {
+	import flash.display.DisplayObject;
 	import flash.utils.ByteArray;
 	
 	import org.flexlite.domDisplay.codec.DxrDecoder;
@@ -116,6 +117,16 @@ package org.flexlite.domDisplay.utils
 			if(!hasKey)
 				return null;
 			return DxrEncoder.writeObject({keyList:keyList});
+		}
+		
+		/**
+		 * 为指定的显示对象生成唯一的key
+		 * @param dp 要绘制的显示对象，可以是MovieClip
+		 */			
+		public static function generateKey(dp:DisplayObject):String
+		{
+			var dxrEncoder:DxrEncoder = new DxrEncoder();
+			return dxrEncoder.drawDxrData(dp).key;
 		}
 	}
 }
