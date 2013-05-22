@@ -10,6 +10,7 @@ package org.flexlite.domCompile.compiler
 	import org.flexlite.domCompile.core.CpNotation;
 	import org.flexlite.domCompile.core.CpVariable;
 	import org.flexlite.domCore.DXML;
+	import org.flexlite.domCore.Injector;
 	import org.flexlite.domUtils.StringUtil;
 	
 	/**
@@ -24,16 +25,30 @@ package org.flexlite.domCompile.compiler
 		public function DXMLCompiler()
 		{
 			super();
+			try
+			{
+				dxmlConfig = Injector.getInstance(IDxmlConfig);
+			}
+			catch(e:Error)
+			{
+				if(!configData)
+				{
+					throw new Error("还未注入flexlite-manifest框架清单配置数据！");
+					return;
+				}
+				dxmlConfig = new DxmlConfig(configData);
+			}
 		}
 		
 		/**
-		 * flexlite-manifest框架清单文件
+		 * flexlite-manifest框架清单文件,请在实例化DXMLCompiler之前对其赋值。<br/>
+		 * 注意：要使编译器正常工作,必须对此属性赋值,或调用Injector注入自定义的IDxmlConfig实例,二选一。
 		 */
 		public static var configData:XML;
 		/**
-		 * 项目配置文件
-		 */
-		public static var projectConfigData:XML;
+		 * 配置管理器实例
+		 */		
+		private var dxmlConfig:IDxmlConfig;
 		/**
 		 * 当前类 
 		 */		
@@ -62,11 +77,6 @@ package org.flexlite.domCompile.compiler
 		 */		
 		public function compile(xmlData:XML,className:String):String
 		{
-			if(configData==null)
-			{
-				throw new Error("还未注入flexlite-manifest框架清单配置数据！");
-				return "";
-			}
 			if(!xmlData||!className)
 				return "";
 			
@@ -239,9 +249,9 @@ package org.flexlite.domCompile.compiler
 			addAttributesToCodeBlock(cb,varName,node);
 			
 			var children:XMLList = node.children();
-			var obj:Object = getDefaultPropByNode(node);
-			var property:String = obj.d;
-			var isArray:Boolean = obj.array;
+			var obj:Object = dxmlConfig.getDefaultPropById(node.localName(),node.namespace());
+			var property:String = obj.name;
+			var isArray:Boolean = obj.isArray;
 			
 			initlizeChildNode(cb,children,property,isArray,varName);
 			
@@ -329,7 +339,7 @@ package org.flexlite.domCompile.compiler
 			{
 				value = node["@"+key].toString();
 				key = formatKey(key,value);
-				value  = formatValue(key,value,node.@id);
+				value  = formatValue(key,value,node);
 				cb.addAssignment(varName,value,key);
 			}
 		}
@@ -450,11 +460,7 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private function formatKey(key:String,value:String):String
 		{
-			if(key=="skinClass")
-			{
-				key = "skinName";
-			}
-			else if(value.indexOf("%")!=-1)
+			if(value.indexOf("%")!=-1)
 			{
 				if(key=="height")
 					key = "percentHeight";
@@ -466,49 +472,45 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * 格式化值
 		 */		
-		private function formatValue(key:String,value:String,id:String):String
+		private function formatValue(key:String,value:String,node:XML):String
 		{
 			var stringValue:String = value;//除了字符串，其他类型都去除两端多余空格。
 			value = StringUtil.trim(value);
 			var index:int = value.indexOf("@Embed(");
 			if(index!=-1)
 			{
+				var id:String = node.hasOwnProperty("@id")?node.@id:"this";
 				var metadata:String = value.substr(index+1);
 				currentClass.addVariable(new CpVariable(id+"_"+key,Modifiers.M_PRIVATE,"Class","",true,false,metadata));
 				value = id+"_"+key; 
-			}
-			else if(key=="skinClass"||key=="skinName"||key=="itemRenderer"||key=="itemRendererSkinName")
-			{
-				if(isPackageName(value))
-				{
-					currentClass.addImport(value);
-				}
-				else
-				{
-					value = formatString(stringValue);
-				}
 			}
 			else if(value.indexOf("{")!=-1)
 			{
 				value = value.substr(1,value.length-2);
 			}
-			else if(isStringKey(key))
+			else
 			{
-				value = formatString(stringValue);
-			}
-			else if(value.indexOf("%")!=-1
-				&&(key=="percentHeight"||key=="percentWidth"))
-			{
-				value = StringUtil.trim(value);
-				value = Number(value.substr(0,value.length-1)).toString();
-			}
-			else if(value.indexOf("#")==0)
-			{
-				value = "0x"+value.substr(1);
-			}
-			else if(isNaN(Number(value))&&value!="true"&&value!="false")
-			{
-				value = formatString(stringValue);
+				var className:String = dxmlConfig.getClassNameById(node.localName(),node.namespace());
+				var type:String = dxmlConfig.getPropertyType(key,className,value);
+				switch(type)
+				{
+					case "Class":
+						currentClass.addImport(value);
+						break;
+					case "uint":
+						if(value.indexOf("#")==0)
+							value = "0x"+value.substring(1);
+						break;
+					case "Number":
+						if(value.indexOf("%")!=-1)
+							value = Number(value.substr(0,value.length-1)).toString();
+						break;
+					case "String":
+						value = formatString(stringValue);
+						break;
+					default:
+						break;
+				}
 			}
 			return value;
 		}
@@ -521,23 +523,6 @@ package org.flexlite.domCompile.compiler
 			value = value.split("\n").join("\\n");
 			value = value.split("\r").join("\\n");
 			return value;
-		}
-		
-		/**
-		 * 类型为字符串的属性名列表
-		 */		
-		private var stringKeyList:Array = ["text","label"];
-		/**
-		 * 判断一个属性是否是字符串类型。
-		 */		
-		private function isStringKey(key:String):Boolean
-		{
-			for each(var str:String in stringKeyList)
-			{
-				if(str==key)
-					return true;
-			}
-			return false;
 		}
 		
 		/**
@@ -571,9 +556,9 @@ package org.flexlite.domCompile.compiler
 				}
 			}
 			
-			var obj:Object = getDefaultPropByNode(currentXML);
-			var property:String = obj.d;
-			var isArray:Boolean = obj.array;
+			var obj:Object =  dxmlConfig.getDefaultPropById(currentXML.localName(),currentXML.namespace());
+			var property:String = obj.name;
+			var isArray:Boolean = obj.isArray;
 			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
 			
 			getStateNames();
@@ -602,7 +587,7 @@ package org.flexlite.domCompile.compiler
 				{
 					var key:String = itemName.substring(0,index);
 					key = formatKey(key,item);
-					var itemValue:String = formatValue(key,item,"this");
+					var itemValue:String = formatValue(key,item,currentXML);
 					var stateName:String = itemName.substr(index+1);
 					states = getStateByName(stateName);
 					if(states.length>0)
@@ -760,7 +745,7 @@ package org.flexlite.domCompile.compiler
 						{
 							var key:String = name.substring(0,index);
 							key = formatKey(key,item);
-							var value:String = formatValue(key,item,node.@id);
+							var value:String = formatValue(key,item,node);
 							stateName = name.substr(index+1);
 							states = getStateByName(stateName);
 							if(states.length>0)
@@ -883,27 +868,6 @@ package org.flexlite.domCompile.compiler
 		private static const SETPROPERTY_PACKAGE:String = "org.flexlite.domUI.states.SetProperty";
 		
 		private static const DECLARATIONS:String = "Declarations";
-		/**
-		 * 使用框架配置文件的默认命名空间 
-		 */		
-		private static const DEFAULT_NS:Array = 
-			[DXML.NS,
-				new Namespace("s","library://ns.adobe.com/flex/spark"),
-				new Namespace("mx","library://ns.adobe.com/flex/mx"),
-				new Namespace("fx","http://ns.adobe.com/mxml/2009")];
-		
-		/**
-		 * 指定的命名空间是否是默认命名空间
-		 */		
-		private static function isDefaultNs(ns:Namespace):Boolean
-		{
-			for each(var dns:Namespace in DEFAULT_NS)
-			{
-				if(ns==dns)
-					return true;
-			}
-			return false;
-		}
 		
 		/**
 		 * 根据类名获取对应的包，并自动导入相应的包
@@ -911,127 +875,16 @@ package org.flexlite.domCompile.compiler
 		private function getPackageByNode(node:XML):String
 		{
 			var packageName:String = "";
-			var config:XML = getConfigNode(node);
-			if(config!=null)
-				packageName = config.@p;
-			if(packageName!=""&&packageName.indexOf(".")!=-1)
+			var ns:Namespace = node.namespace();
+			if(!ns)
+				return packageName;
+			var id:String = node.localName();
+			packageName = dxmlConfig.getClassNameById(id,ns);
+			if(packageName&&packageName.indexOf(".")!=-1)
 			{
 				currentClass.addImport(packageName);
 			}
 			return packageName;
-		}
-		/**
-		 * 获取配置节点
-		 */		
-		private static function getConfigNode(node:XML):XML
-		{
-			var ns:Namespace = node.namespace();
-			if(!ns)
-				return null;
-			var className:String = node.localName();
-			if(isDefaultNs(ns))
-			{
-				for each(var component:XML in configData.children())
-				{
-					if(component.@id==className)
-					{
-						return component;
-					}
-				}
-			}
-			else if(projectConfigData!=null)
-			{
-				var p:String = ns.uri;
-				p = p.substring(0,p.length-1)+className;
-				for each(var item:XML in projectConfigData.children())
-				{
-					if(item.@p==p)
-					{
-						return item;
-					}
-				}
-			}
-			return null;
-		}
-		/**
-		 * 根据包名获取配置节点
-		 */		
-		private static function getConfigNodeByPackage(packageName:String):XML
-		{
-			for each(var component:XML in configData.children())
-			{
-				if(component.@p==packageName)
-				{
-					return component;
-				}
-			}
-			if(projectConfigData!=null)
-			{
-				for each(var item:XML in projectConfigData.children())
-				{
-					if(item.@p == packageName)
-					{
-						return item;
-					}
-				}
-			}
-			return null;
-		}
-		/**
-		 * 根据类名获取对应默认属性
-		 */
-		private static function getDefaultPropByNode(node:XML):Object
-		{
-			var config:XML = getConfigNode(node);
-			if(config==null)
-				return {d:"",array:false};
-			findProp(config);
-			return {d:config.@d,array:config.@array=="true"};
-		}
-		/**
-		 * 递归查询默认值
-		 */		
-		private static function findProp(node:XML):String
-		{
-			if(node.hasOwnProperty("@d"))
-			{
-				return node.@d;
-			}
-			
-			var superClass:String = node.@s;
-			var superNode:XML;
-			var item:XML;
-			var found:Boolean;
-			for each(item in configData.children())
-			{
-				if(item.@p==superClass)
-				{
-					superNode = item;
-					break;
-				}
-			}
-			if(!found&&projectConfigData!=null)
-			{
-				for each(item in projectConfigData.children())
-				{
-					if(item.@p==superClass)
-					{
-						superNode = item;
-						break;
-					}
-				}
-			}
-			if(superNode!=null)
-			{
-				var prop:String = findProp(superNode);
-				if(prop!="")
-				{
-					node.@d = prop;
-					if(superNode.hasOwnProperty("@array"))
-						node.@array = superNode.@array;
-				}
-			}
-			return node.@d;
 		}
 		/**
 		 * 检查变量是否是包名
@@ -1039,20 +892,6 @@ package org.flexlite.domCompile.compiler
 		private function isPackageName(name:String):Boolean
 		{
 			return name.indexOf(".")!=-1;
-		}
-		/**
-		 * 指定的变量名是否是工程默认包里的类名
-		 */		
-		private static function isDefaultPackageClass(name:String):Boolean
-		{
-			if(projectConfigData==null||name=="")
-				return false;
-			for each(var item:XML in projectConfigData.children())
-			{
-				if(item.@p == name)
-					return true;
-			}
-			return false;
 		}
 	}
 }
