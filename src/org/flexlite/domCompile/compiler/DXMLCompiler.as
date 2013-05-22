@@ -112,6 +112,11 @@ package org.flexlite.domCompile.compiler
 		{
 			currentClass.superClass = getPackageByNode(currentXML);
 			
+			getStateNames();
+			if(stateCode.length>0&&!currentXML.hasOwnProperty("@currentState"))
+			{
+				currentXML.@currentState = stateCode[0].name;
+			}
 			addIds(currentXML.children());
 			
 			createConstructFunc();
@@ -128,18 +133,22 @@ package org.flexlite.domCompile.compiler
 				{
 					createVarForNode(node);
 					if(isStateNode(node))//检查节点是否只存在于一个状态里，需要延迟实例化
-						stateIds.push(node.@id);
+						stateIds.push(String(node.@id));
 				}
 				else if(getPackageByNode(node)!="")
 				{
 					createIdForNode(node);
 					if(isStateNode(node))
-						stateIds.push(node.@id);
+						stateIds.push(String(node.@id));
 					if(containsState(node))
 					{
 						createVarForNode(node);
 						
 						var parentNode:XML = node.parent() as XML;
+						if(parentNode.localName()=="Array")
+							parentNode = parentNode.parent() as XML;
+						if(isProperty(parentNode))
+							parentNode = parentNode.parent() as XML;
 						if(isStateNode(node)&&parentNode!=null&&parentNode!=currentXML
 							&&!currentClass.containsVar(getNodeId(parentNode)))
 						{
@@ -372,7 +381,9 @@ package org.flexlite.domCompile.compiler
 						var values:Array = [];
 						for each(var item:XML in child.children())
 						{
-							values.push(createFuncForNode(item));
+							childFunc = createFuncForNode(item);
+							if(prop!="elementsContent"||!isStateNode(item))
+								values.push(childFunc);
 						}
 						childFunc = "["+values.join(",")+"]";
 					}
@@ -383,10 +394,14 @@ package org.flexlite.domCompile.compiler
 						if(firsChild.localName()!="Array"&&
 							prop==property&&isArray)
 						{
-							childFunc = "["+childFunc+"]";
+							if(prop!="elementsContent"||!isStateNode(item))
+								childFunc = "["+childFunc+"]";
+							else
+								childFunc = "[]";
+							
 						}
 					}
-					if(childFunc!=""&&!isStateNode(child))
+					if(childFunc!="")
 					{
 						if(childFunc.indexOf("()")==-1)
 							prop = formatKey(prop,childFunc);
@@ -403,25 +418,15 @@ package org.flexlite.domCompile.compiler
 				return;
 			if(isArray&&(directChild.length>1||directChild[0].localName()!="Array"))
 			{
-				var arrValue:String = "[";
-				var isFirst:Boolean = true;
+				var childs:Array = [];
 				for each(child in directChild)
 				{
 					childFunc = createFuncForNode(child);
 					if(childFunc==""||isStateNode(child))
 						continue;
-					if(isFirst)
-					{
-						arrValue += childFunc;
-						isFirst = false;
-					}
-					else
-					{
-						arrValue += ","+childFunc;
-					}
+					childs.push(childFunc);
 				}
-				arrValue += "]";
-				cb.addAssignment(varName,arrValue,property);
+				cb.addAssignment(varName,"["+childs.join(",")+"]",property);
 			}
 			else
 			{
@@ -560,7 +565,6 @@ package org.flexlite.domCompile.compiler
 			var isArray:Boolean = obj.isArray;
 			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
 			
-			getStateNames();
 			cb.addEmptyLine();
 			var id:String;
 			if(stateIds.length>0)
@@ -705,6 +709,10 @@ package org.flexlite.domCompile.compiler
 					{
 						var propertyName:String = "";
 						var parentNode:XML = node.parent() as XML;
+						if(parentNode.localName()=="Array")
+							parentNode = parentNode.parent() as XML;
+						if(isProperty(parentNode))
+							parentNode = parentNode.parent() as XML;
 						if(parentNode!=null&&parentNode != currentXML)
 							propertyName = parentNode.@id;
 						var positionObj:Object = findNearNodeId(node);
