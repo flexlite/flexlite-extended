@@ -9,7 +9,6 @@ package org.flexlite.domCompile.compiler
 	import org.flexlite.domCompile.core.CpFunction;
 	import org.flexlite.domCompile.core.CpNotation;
 	import org.flexlite.domCompile.core.CpVariable;
-	import org.flexlite.domCore.DXML;
 	import org.flexlite.domCore.Injector;
 	import org.flexlite.domUtils.StringUtil;
 	
@@ -684,7 +683,6 @@ package org.flexlite.domCompile.compiler
 				}
 				stateCode.push(new CpState(state.@name,stateGroups));
 			}
-			currentClass.addImport(getPackageByNode(states[0]));
 		}
 		
 		/**
@@ -874,24 +872,29 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private function getPackageByNode(node:XML):String
 		{
-			var packageName:String = "";
-			var ns:Namespace = node.namespace();
-			if(!ns)
-				return packageName;
-			var id:String = node.localName();
-			packageName = dxmlConfig.getClassNameById(id,ns);
+			var packageName:String = 
+				dxmlConfig.getClassNameById(node.localName(),node.namespace());
+			checkComponent(packageName);
 			if(packageName&&packageName.indexOf(".")!=-1)
 			{
 				currentClass.addImport(packageName);
 			}
 			return packageName;
 		}
+		
 		/**
 		 * 检查变量是否是包名
 		 */		
 		private function isPackageName(name:String):Boolean
 		{
 			return name.indexOf(".")!=-1;
+		}
+		
+		private function checkComponent(className:String):void
+		{
+			if(!className||dxmlConfig.hasComponent(className))
+				return;
+			dxmlConfig.addComponent(className);
 		}
 	}
 }

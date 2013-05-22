@@ -10,9 +10,9 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * 添加一个项目内的自定义组件,若要添加的组件已经存在，则覆盖原组件。
 		 * @param className 组件完整类名
-		 * @param superClass 组件父级完整类名
+		 * @param superClass 组件父级完整类名，若不传入，则由注入的配置管理器自行获取。
 		 */
-		function addComponent(className:String,superClass:String):void;
+		function addComponent(className:String,superClass:String=null):void;
 		
 		/**
 		 * 是否含有某个组件

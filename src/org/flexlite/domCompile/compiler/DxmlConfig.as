@@ -66,7 +66,7 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * @inheritDoc
 		 */
-		public function addComponent(className:String,superClass:String):void
+		public function addComponent(className:String,superClass:String=null):void
 		{
 			if(!className)
 				return;
