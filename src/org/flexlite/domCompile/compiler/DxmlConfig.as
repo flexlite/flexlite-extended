@@ -1,5 +1,6 @@
 package org.flexlite.domCompile.compiler
 {
+	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import org.flexlite.domCore.DXML;
@@ -8,7 +9,7 @@ package org.flexlite.domCompile.compiler
 	 * DXML配置管理器
 	 * @author DOM
 	 */
-	public class DxmlConfig implements IDxmlConfig
+	public class DxmlConfig extends EventDispatcher implements IDxmlConfig
 	{
 		/**
 		 * 构造函数
