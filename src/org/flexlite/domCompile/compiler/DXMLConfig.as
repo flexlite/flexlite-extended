@@ -9,24 +9,27 @@ package org.flexlite.domCompile.compiler
 	 * DXML配置管理器
 	 * @author DOM
 	 */
-	public class DxmlConfig extends EventDispatcher implements IDxmlConfig
+	public class DXMLConfig extends EventDispatcher implements IDXMLConfig
 	{
 		/**
 		 * 构造函数
 		 */		
-		public function DxmlConfig(manifest:XML)
+		public function DXMLConfig(manifest:XML=null)
 		{
-			parseManifest(manifest);
+			if(manifest)
+			{
+				parseManifest(manifest);
+			}
 		}
 		
 		/**
 		 * 组件清单列表
 		 */		
-		private var componentDic:Dictionary = new Dictionary();
+		protected var componentDic:Dictionary = new Dictionary();
 		/**
 		 * 框架组件ID到完整类名映射列表
 		 */		
-		private var idDic:Dictionary = new Dictionary();
+		protected var idDic:Dictionary = new Dictionary();
 		/**
 		 * 解析框架清单文件
 		 */		
@@ -67,25 +70,16 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * @inheritDoc
 		 */
-		public function addComponent(className:String,superClass:String=null):void
+		public function addComponent(className:String):void
 		{
-			if(!className)
-				return;
-			if(superClass==null)
-				superClass = "";
-			className = className.split("::").join(".");
-			superClass = superClass.split("::").join(".");
-			var id:String = className;
-			var index:int = className.lastIndexOf(".");
-			if(index!=-1)
-			{
-				id = className.substring(index+1);
-			}
-			var component:Component = new Component();
-			component.id = id;
-			component.className = className;
-			component.superClass = superClass;
-			componentDic[className] = component;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function removeComponent(className:String):void
+		{
+			delete componentDic[className];
 		}
 		
 		/**
@@ -209,48 +203,4 @@ package org.flexlite.domCompile.compiler
 			return false;
 		}
 	}
-}
-/**
- * 组件数据对象
- * @author DOM
- */
-class Component
-{
-	/**
-	 * 构造函数
-	 */	
-	public function Component(item:XML=null)
-	{
-		if(item)
-		{
-			id = String(item.@id);
-			className = String(item.@p);
-			if(item.hasOwnProperty("@s"))
-				superClass = String(item.@s);
-			if(item.hasOwnProperty("@d"))
-				defaultProp = String(item.@d);
-			if(item.hasOwnProperty("@array"))
-				isArray = Boolean(item.@array=="true");
-		}
-	}
-	/**
-	 * 短名ID
-	 */	
-	public var id:String;
-	/**
-	 * 完整类名
-	 */	
-	public var className:String;
-	/**
-	 * 父级类名
-	 */	
-	public var superClass:String = "";
-	/**
-	 * 默认属性
-	 */	
-	public var defaultProp:String = "";
-	/**
-	 * 默认属性是否为数组类型
-	 */	
-	public var isArray:Boolean = false;
 }

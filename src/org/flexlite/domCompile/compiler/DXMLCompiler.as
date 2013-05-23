@@ -26,7 +26,7 @@ package org.flexlite.domCompile.compiler
 			super();
 			try
 			{
-				dxmlConfig = Injector.getInstance(IDxmlConfig);
+				dxmlConfig = Injector.getInstance(IDXMLConfig);
 			}
 			catch(e:Error)
 			{
@@ -35,7 +35,7 @@ package org.flexlite.domCompile.compiler
 					throw new Error("还未注入flexlite-manifest框架清单配置数据！");
 					return;
 				}
-				dxmlConfig = new DxmlConfig(configData);
+				dxmlConfig = new DXMLConfig(configData);
 			}
 		}
 		
@@ -47,7 +47,7 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * 配置管理器实例
 		 */		
-		private var dxmlConfig:IDxmlConfig;
+		private var dxmlConfig:IDXMLConfig;
 		/**
 		 * 当前类 
 		 */		
