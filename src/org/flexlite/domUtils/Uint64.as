@@ -158,73 +158,26 @@ package org.flexlite.domUtils
 			{
 				throw new RangeError("基数参数必须介于 2 到 36 之间；当前值为 "+radix+"。");
 			}
-			if(cacheString[radix]!==undefined)
+			if(cacheString[radix])
 				return cacheString[radix];
-			
-			var highNums:Array = readNumberArray(_higherUint.toString(radix));
-			var lowNums:Array = readNumberArray(_lowerUint.toString(radix));
-			var mutli:Number = 4294967296;
-			var multiNums:Array = readNumberArray(mutli.toString(radix));
-			
-			var result:Array = [];
-			var length:int = 64;
-			for(var i:int=0;i<length;i++)
-				result[i] = 0;
-			
-			length = highNums.length;
-			var multiLength:int = multiNums.length;
-			for(i=0;i<length;i++)
+			var result:String="";
+			var lowUint:uint=_lowerUint;
+			var highUint:uint=_higherUint;
+			var highRemain:Number;
+			var lowRemain:Number;
+			var tempNum:Number;
+			var MaxLowUint:Number = Math.pow(2,32);
+			while(highUint!=0||lowUint!=0)
 			{
-				for(var j:int=0;j<multiLength;j++)
-				{
-					result[i+j]+=highNums[i]*multiNums[j];
-					result[i+j+1]+=int(result[i+j]/radix); 
-					result[i+j]%=radix;
-				}
+				highRemain=(highUint%radix);
+				tempNum=highRemain*MaxLowUint+lowUint;
+				lowRemain=tempNum%radix;
+				result=lowRemain.toString(radix)+result;
+				highUint=(highUint-highRemain)/radix;
+				lowUint=(tempNum-lowRemain)/radix;
 			}
-			
-			length = result.length;
-			var lowLen:int = lowNums.length;
-			for(i=0;i<length-1;i++)
-			{
-				if(i>=lowLen)
-					lowNums[i] = 0;
-				result[i] += lowNums[i];
-				result[i+1] += int(result[i]/radix);
-				result[i] %= radix;
-			}
-			
-			var finalResult:Array = [];
-			var found:Boolean = false;
-			for(i=result.length;i>=0;i--)
-			{
-				if(!found)
-				{
-					if(!result[i])
-						continue;
-					else
-						found = true;
-				}
-				finalResult.push(result[i].toString(radix));
-			}
-			cacheString[radix] = finalResult.join("");
+			cacheString[radix] = result;
 			return cacheString[radix];
-		}
-		/**
-		 * 从字符串读取数字列表，数字的低位在数组低位。
-		 */		
-		private function readNumberArray(str:String):Array
-		{
-			var numbers:Array = [];
-			var num:Number;
-			for(var i:int=str.length-1;i>=0;i--)
-			{
-				num = str.charCodeAt(i)-48;
-				if(num>9)
-					num -= 39;
-				numbers.push(num);
-			}
-			return numbers;
 		}
 	}
 }
