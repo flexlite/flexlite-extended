@@ -1,7 +1,6 @@
 package org.flexlite.domUtils
 {
 	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	
 	/**
 	 * 64位无符号整数
