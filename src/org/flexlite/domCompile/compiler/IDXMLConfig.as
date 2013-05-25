@@ -8,10 +8,11 @@ package org.flexlite.domCompile.compiler
 	public interface IDXMLConfig
 	{
 		/**
-		 * 添加一个项目内的自定义组件,若要添加的组件已经存在，则不做任何操作。
+		 * 添加一个项目内的自定义组件,若要添加的组件已经存在，则覆盖原始组件。
 		 * @param className 组件完整类名
+		 * @param superClass 父级完整类名
 		 */
-		function addComponent(className:String):void;
+		function addComponent(className:String,superClass:String):void;
 		
 		/**
 		 * 移除一个项目内的自定义组件
@@ -24,6 +25,12 @@ package org.flexlite.domCompile.compiler
 		 * @param className 组件完整类名
 		 */		
 		function hasComponent(className:String):Boolean;
+		
+		/**
+		 * 检查指定的类是否存在于配置中，若不存在则执行相应的处理。
+		 * @param className 要检查的类名
+		 */		
+		function checkClass(className:String):void;
 		
 		/**
 		 * 根据类的短名ID和命名空间获取完整类名(以"."分隔)

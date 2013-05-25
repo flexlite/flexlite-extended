@@ -70,8 +70,25 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * @inheritDoc
 		 */
-		public function addComponent(className:String):void
+		public function addComponent(className:String,superClass:String):void
 		{
+			if(!className)
+				return;
+			if(superClass==null)
+				superClass = "";
+			className = className.split("::").join(".");
+			superClass = superClass.split("::").join(".");
+			var id:String = className;
+			var index:int = className.lastIndexOf(".");
+			if(index!=-1)
+			{
+				id = className.substring(index+1);
+			}
+			var component:Component = new Component();
+			component.id = id;
+			component.className = className;
+			component.superClass = superClass;
+			componentDic[className] = component;
 		}
 		
 		/**
@@ -88,6 +105,14 @@ package org.flexlite.domCompile.compiler
 		public function hasComponent(className:String):Boolean
 		{
 			return componentDic[className];
+		}
+		
+		/**
+		 * @inheritDoc
+		 */		
+		public function checkClass(className:String):void
+		{
+			
 		}
 		
 		/**

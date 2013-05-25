@@ -500,6 +500,7 @@ package org.flexlite.domCompile.compiler
 				{
 					case "Class":
 						currentClass.addImport(value);
+						dxmlConfig.checkClass(value);
 						break;
 					case "uint":
 						if(value.indexOf("#")==0)
@@ -882,7 +883,7 @@ package org.flexlite.domCompile.compiler
 		{
 			var packageName:String = 
 				dxmlConfig.getClassNameById(node.localName(),node.namespace());
-			checkComponent(packageName);
+			dxmlConfig.checkClass(packageName);
 			if(packageName&&packageName.indexOf(".")!=-1)
 			{
 				currentClass.addImport(packageName);
@@ -898,12 +899,6 @@ package org.flexlite.domCompile.compiler
 			return name.indexOf(".")!=-1;
 		}
 		
-		private function checkComponent(className:String):void
-		{
-			if(!className||dxmlConfig.hasComponent(className))
-				return;
-			dxmlConfig.addComponent(className);
-		}
 	}
 }
 
