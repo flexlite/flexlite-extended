@@ -306,7 +306,15 @@ package org.flexlite.domUtils
 				return "";
 			path = escapeUrl(path);
 			var startIndex:int = path.lastIndexOf("/");
-			var endIndex:int = path.lastIndexOf(".");
+			var endIndex:int;
+			if(startIndex>0&&startIndex==path.length-1)
+			{
+				path = path.substring(0,path.length-1);
+				startIndex = path.lastIndexOf("/");
+				endIndex = path.length;
+				return path.substring(startIndex+1,endIndex);
+			}
+			endIndex = path.lastIndexOf(".");
 			if(endIndex==-1)
 				endIndex = path.length;
 			return path.substring(startIndex+1,endIndex);
