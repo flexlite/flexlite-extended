@@ -33,7 +33,7 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * 解析框架清单文件
 		 */		
-		private function parseManifest(manifest:XML):void
+		protected function parseManifest(manifest:XML):void
 		{
 			for each(var item:XML in manifest.component)
 			{
