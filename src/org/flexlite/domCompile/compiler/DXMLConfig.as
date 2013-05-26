@@ -110,7 +110,7 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * @inheritDoc
 		 */		
-		public function checkClass(className:String):void
+		public function checkComponent(className:String):void
 		{
 			
 		}

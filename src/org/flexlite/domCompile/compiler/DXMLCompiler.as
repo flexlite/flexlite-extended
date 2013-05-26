@@ -500,7 +500,6 @@ package org.flexlite.domCompile.compiler
 				{
 					case "Class":
 						currentClass.addImport(value);
-						dxmlConfig.checkClass(value);
 						break;
 					case "uint":
 						if(value.indexOf("#")==0)
@@ -883,7 +882,7 @@ package org.flexlite.domCompile.compiler
 		{
 			var packageName:String = 
 				dxmlConfig.getClassNameById(node.localName(),node.namespace());
-			dxmlConfig.checkClass(packageName);
+			dxmlConfig.checkComponent(packageName);
 			if(packageName&&packageName.indexOf(".")!=-1)
 			{
 				currentClass.addImport(packageName);

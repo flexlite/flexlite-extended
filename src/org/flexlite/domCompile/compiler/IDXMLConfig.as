@@ -25,12 +25,11 @@ package org.flexlite.domCompile.compiler
 		 * @param className 组件完整类名
 		 */		
 		function hasComponent(className:String):Boolean;
-		
 		/**
-		 * 检查指定的类是否存在于配置中，若不存在则执行相应的处理。
+		 * 检查指定的类名是否存在于配置中，若不存在则执行相应的处理。
 		 * @param className 要检查的类名
-		 */		
-		function checkClass(className:String):void;
+		 */	
+		function checkComponent(className:String):void;
 		
 		/**
 		 * 根据类的短名ID和命名空间获取完整类名(以"."分隔)
