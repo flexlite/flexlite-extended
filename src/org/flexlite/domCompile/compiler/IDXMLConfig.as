@@ -12,13 +12,13 @@ package org.flexlite.domCompile.compiler
 		 * @param className 组件完整类名
 		 * @param superClass 父级完整类名
 		 */
-		function addComponent(className:String,superClass:String):void;
+		function addComponent(className:String,superClass:String):Component;
 		
 		/**
 		 * 移除一个项目内的自定义组件
 		 * @param className 组件完整类名
 		 */		
-		function removeComponent(className:String):void;
+		function removeComponent(className:String):Component;
 		
 		/**
 		 * 是否含有某个组件

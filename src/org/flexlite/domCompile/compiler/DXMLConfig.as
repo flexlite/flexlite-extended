@@ -70,10 +70,10 @@ package org.flexlite.domCompile.compiler
 		/**
 		 * @inheritDoc
 		 */
-		public function addComponent(className:String,superClass:String):void
+		public function addComponent(className:String,superClass:String):Component
 		{
 			if(!className)
-				return;
+				return null;
 			if(superClass==null)
 				superClass = "";
 			className = className.split("::").join(".");
@@ -89,14 +89,17 @@ package org.flexlite.domCompile.compiler
 			component.className = className;
 			component.superClass = superClass;
 			componentDic[className] = component;
+			return component;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function removeComponent(className:String):void
+		public function removeComponent(className:String):Component
 		{
+			var component:Component = componentDic[className]
 			delete componentDic[className];
+			return component;
 		}
 		
 		/**
