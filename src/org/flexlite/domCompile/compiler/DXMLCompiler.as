@@ -24,23 +24,10 @@ package org.flexlite.domCompile.compiler
 		public function DXMLCompiler()
 		{
 			super();
-			try
-			{
-				dxmlConfig = Injector.getInstance(IDXMLConfig);
-			}
-			catch(e:Error)
-			{
-				if(!configData)
-				{
-					throw new Error("还未注入flexlite-manifest框架清单配置数据！");
-					return;
-				}
-				dxmlConfig = new DXMLConfig(configData);
-			}
 		}
 		
 		/**
-		 * flexlite-manifest框架清单文件,请在实例化DXMLCompiler之前对其赋值。<br/>
+		 * flexlite-manifest框架清单文件<br/>
 		 * 注意：要使编译器正常工作,必须对此属性赋值,或调用Injector注入自定义的IDxmlConfig实例,二选一。
 		 */
 		public static var configData:XML;
@@ -78,7 +65,21 @@ package org.flexlite.domCompile.compiler
 		{
 			if(!xmlData||!className)
 				return "";
-			
+			if(!dxmlConfig)
+			{
+				try
+				{
+					dxmlConfig = Injector.getInstance(IDXMLConfig);
+				}
+				catch(e:Error)
+				{
+					if(!configData)
+					{
+						throw new Error("还未注入flexlite-manifest框架清单配置数据！");
+					}
+					dxmlConfig = new DXMLConfig(configData);
+				}
+			}
 			currentXML = new XML(xmlData);	
 			className = className.split("::").join(".");
 			idDic = new Dictionary;
