@@ -148,16 +148,18 @@ package org.flexlite.domUtils.loader
 			this.compFunc = compFunc;
 			this.progressFunc = progressFunc;
 			this.ioErrorFunc = ioErrorFunc;
+			var ldc:LoaderContext;
 			if(appDomain)
 			{
-				var ldc:LoaderContext = new LoaderContext(false,appDomain);
-				ldc.allowCodeImport = true;
-				loader.loadBytes(bytes,ldc);
+				ldc = new LoaderContext(false,appDomain);
+				
 			}
 			else
 			{
-				loader.loadBytes(bytes);
+				ldc = new LoaderContext();
 			}
+			ldc.allowCodeImport = true;
+			loader.loadBytes(bytes,ldc);
 		}
 		
 		/**
