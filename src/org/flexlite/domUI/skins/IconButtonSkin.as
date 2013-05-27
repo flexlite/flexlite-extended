@@ -2,7 +2,10 @@ package org.flexlite.domUI.skins
 {
 	import org.flexlite.domUI.components.UIAsset;
 	import org.flexlite.domUI.skins.vector.ButtonSkin;
-
+	/**
+	 * 图标按钮默认皮肤
+	 * @author foodyi
+	 */	
 	public class IconButtonSkin extends ButtonSkin
 	{
 		public function IconButtonSkin()
@@ -13,9 +16,9 @@ package org.flexlite.domUI.skins
 		public var iconDisplay:UIAsset;
 		
 		override protected function createChildren():void{
-			super.createChildren();
 			iconDisplay = new UIAsset();
 			addElement( iconDisplay );
+			super.createChildren();
 		}
 		
 		override protected function updateDisplayList(w:Number, h:Number):void{
@@ -23,8 +26,8 @@ package org.flexlite.domUI.skins
 			
 			if( iconDisplay )
 			{
-				iconDisplay.x = w*.5 - iconDisplay.width*.5;
-				iconDisplay.y = h*.5 - iconDisplay.height*.5;
+				iconDisplay.x = w*.5 - iconDisplay.layoutBoundsWidth*.5;
+				iconDisplay.y = h*.5 - iconDisplay.layoutBoundsHeight*.5;
 			}
 		}
 	}
