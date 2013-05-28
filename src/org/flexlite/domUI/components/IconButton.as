@@ -24,6 +24,8 @@ package org.flexlite.domUI.components
 		public function set icon( value:Object ):void
 		{
 			_icon = value;
+			partAdded("iconDisplay",iconDisplay);
+			
 		}
 		
 		override protected function partAdded(partName:String, instance:Object):void
