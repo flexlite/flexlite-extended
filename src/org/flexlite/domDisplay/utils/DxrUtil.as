@@ -1,19 +1,53 @@
 package org.flexlite.domDisplay.utils
 {
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.geom.Point;
 	import flash.utils.ByteArray;
 	
+	import org.flexlite.domDisplay.DxrData;
 	import org.flexlite.domDisplay.codec.DxrDecoder;
 	import org.flexlite.domDisplay.codec.DxrEncoder;
 	import org.flexlite.domUtils.CRC32Util;
 	import org.flexlite.domUtils.FileUtil;
 	
 	/**
-	 * DXR拆分合并工具
+	 * DXR工具类
 	 * @author DOM
 	 */
 	public class DxrUtil
 	{
+		/**
+		 * 两个DxrData比较，若帧数,每帧偏移量和每帧的像素都相同，返回true。
+		 * @param otherDxrData 要比较的另一个DxrData。
+		 */		
+		public static function compare(dxrDataA:DxrData,dxrDataB:DxrData):Boolean
+		{
+			if(dxrDataA==dxrDataB)
+				return true;
+			if(!dxrDataA||!dxrDataB)
+				return false;
+			if(dxrDataA.totalFrames!=dxrDataB.totalFrames)
+				return false;
+			var index:int = 0;
+			var length:int = dxrDataB.totalFrames;
+			var offsetPosA:Point;
+			var offsetPosB:Point;
+			var bdA:BitmapData;
+			var bdB:BitmapData;
+			for(var i:int = 0;i<length;i++)
+			{
+				offsetPosA = dxrDataA.getFrameOffset(i);
+				offsetPosB = dxrDataB.getFrameOffset(i);
+				if(!offsetPosA.equals(offsetPosB))
+					return false;
+				bdA = dxrDataA.getBitmapData(i);
+				bdB = dxrDataB.getBitmapData(i);
+				if(bdA.compare(bdB)!=0)
+					return false;
+			}
+			return true;
+		}
 		/**
 		 * 从Dxr文件中移除指定的键值列表。
 		 * @param dxrPath dxr文件路径
