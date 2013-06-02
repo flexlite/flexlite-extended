@@ -1,5 +1,7 @@
 package org.flexlite.domDisplay.codec
 {
+	import com.codeazur.as3swf.utils.ObjCUtils;
+	
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.FrameLabel;
@@ -150,9 +152,11 @@ package org.flexlite.domDisplay.codec
 		 */		
 		private function encodeDxrData(dxrData:DxrData,maxBitmapWidth:Number=4000,maxBitmapHeight:Number=4000):Object
 		{
+			var copyFrom:Array = compareBitmap(dxrData);
+			var copyFromIndex:int;
 			var bitmapEncoder:IBitmapEncoder = Injector.getInstance(IBitmapEncoder,dxrData.codecKey);
 			var data:Object = {codec:bitmapEncoder.codecKey,bitmapList:[],frameInfo:[]};
-			var frmaeInfo:Array;
+			var frameInfo:Array;
 			var tempBmData:BitmapData = new BitmapData(maxBitmapWidth,maxBitmapHeight,true,0);
 			var bitmapIndex:int = 0;
 			var currentX:Number = 0;
@@ -161,13 +165,31 @@ package org.flexlite.domDisplay.codec
 			var index:int = 0;
 			var tempBmRect:Rectangle;
 			var pageData:BitmapData;
+			var offsetPoint:Point;
 			for each(var frameBmData:BitmapData in dxrData.frameList)
 			{
 				var offsetRect:Rectangle = getColorRect(frameBmData);
+				offsetPoint = dxrData.frameOffsetList[index];
 				if(offsetRect.width>maxBitmapWidth||offsetRect.height>maxBitmapHeight)
 				{
 					throw new Error("DXR动画："+dxrData.key+" 的第"+index
 						+"帧超过了所设置的最大位图尺寸:"+maxBitmapWidth+"x"+maxBitmapHeight+"!");
+				}
+				if(copyFrom[index]!==undefined)
+				{
+					copyFromIndex = copyFrom[index];
+					frameInfo = data.frameInfo[copyFromIndex];
+					frameInfo = frameInfo.concat();
+					frameInfo[5] = offsetPoint.x+offsetRect.x;
+					frameInfo[6] = offsetPoint.y+offsetRect.y;
+					if(frameInfo.length<9)
+					{
+						frameInfo[7] = frameInfo[8] = 0;
+					}
+					frameInfo[9] = copyFromIndex;
+					data.frameInfo[index] = frameInfo;
+					index++;
+					continue;
 				}
 				if(offsetRect.width>maxBitmapWidth-currentX)
 				{
@@ -188,22 +210,20 @@ package org.flexlite.domDisplay.codec
 					bitmapIndex++;
 				}
 				tempBmData.copyPixels(frameBmData,offsetRect,new Point(currentX,currentY),null,null,true);
-				var offsetPoint:Point = dxrData.frameOffsetList[index];
-				frmaeInfo = [bitmapIndex,currentX,currentY,offsetRect.width,offsetRect.height,
+				frameInfo = [bitmapIndex,currentX,currentY,offsetRect.width,offsetRect.height,
 					offsetPoint.x+offsetRect.x,offsetPoint.y+offsetRect.y];
 				var filterOffset:Point = dxrData.filterOffsetList[index];
 				if(filterOffset)
 				{
-					frmaeInfo[7] = filterOffset.x;
-					frmaeInfo[8] = filterOffset.y;
+					frameInfo[7] = filterOffset.x;
+					frameInfo[8] = filterOffset.y;
 				}
-				data.frameInfo[index] = frmaeInfo;
+				data.frameInfo[index] = frameInfo;
 				maxHeight = Math.max(maxHeight,offsetRect.height);
 				currentX += offsetRect.width; 
 				index++;
 			}
 			tempBmRect = getColorRect(tempBmData);
-				var t:Number = getTimer();
 			if(tempBmRect.width>=1&&tempBmRect.height>=1)
 			{
 				pageData = new BitmapData(tempBmRect.width,tempBmRect.height,true,0);
@@ -214,7 +234,6 @@ package org.flexlite.domDisplay.codec
 			{
 				data.bitmapList[bitmapIndex] = bitmapEncoder.encode(new BitmapData(1,1,true,0));
 			}
-				trace("编码时间："+(getTimer()-t)+"ms");
 			
 			if(dxrData._scale9Grid)
 			{
@@ -232,6 +251,34 @@ package org.flexlite.domDisplay.codec
 				data.frameLabels = fls;
 			}
 			return data;
+		}
+		/**
+		 * 比较位图，获取位图数据相同的索引映射表。
+		 */		
+		private function compareBitmap(dxrData:DxrData):Array
+		{
+			var copyFrom:Array = [];
+			var frameList:Array = dxrData.frameList;
+			var length:int = frameList.length;
+			var frameA:BitmapData;
+			var frameB:BitmapData;
+			for(var i:int=0;i<length;i++)
+			{
+				if(copyFrom[i]!==undefined)
+					continue;
+				frameA = frameList[i];
+				for(var j:int=i+1;j<length;j++)
+				{
+					if(copyFrom[j]!==undefined)
+						continue;
+					frameB = frameList[j];
+					if(frameA==frameB||frameA.compare(frameB)==0)
+					{
+						copyFrom[j] = i;
+					}
+				}
+			}
+			return copyFrom;
 		}
 		
 		/**
