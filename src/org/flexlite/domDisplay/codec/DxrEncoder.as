@@ -4,7 +4,10 @@ package org.flexlite.domDisplay.codec
 	
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
+	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
@@ -97,6 +100,47 @@ package org.flexlite.domDisplay.codec
 				index++;
 			}
 			return dxrDataList;
+		}
+		/**
+		 * 调整偏移量用的容器
+		 */		
+		private var container:Sprite
+		/**
+		 * 复写父级方法，修正非整数的偏移量。
+		 */		
+		override dx_internal function drawDisplayObject(dp:DisplayObject, dxrData:DxrData, frame:int):void
+		{
+			var dpRect:Rectangle = dp.getBounds(dp);
+			var offsetX:Number = dpRect.x%1;
+			var offsetY:Number = dpRect.y%1;
+			var stage:Stage = dp.stage;
+			if(stage&&(Math.abs(offsetX)>0||Math.abs(offsetY)>0))
+			{
+				if(!container)
+				{
+					container = new Sprite();
+					container.visible = false;
+				}
+				stage.addChild(container);
+				var oldX:Number = dp.x;
+				var oldY:Number = dp.y;
+				var oldParent:DisplayObjectContainer = dp.parent;
+				container.addChild(dp);
+				dp.x = -dpRect.x;
+				dp.y = -dpRect.y;
+				super.drawDisplayObject(container,dxrData,frame);
+				var offsetPoint:Point = dxrData.frameOffsetList[frame];
+				offsetPoint.x = offsetPoint.x +Math.round(dpRect.x);
+				offsetPoint.y = offsetPoint.y +Math.round(dpRect.y);
+				oldParent.addChild(dp);
+				dp.x = oldX;
+				dp.y = oldY;
+				stage.removeChild(container);
+			}
+			else
+			{
+				super.drawDisplayObject(dp,dxrData,frame);
+			}
 		}
 		
 		/**
@@ -200,6 +244,8 @@ package org.flexlite.domDisplay.codec
 				if(offsetRect.height>maxBitmapHeight-currentY)
 				{
 					tempBmRect = getColorRect(tempBmData);
+					tempBmRect.x = 0;
+					tempBmRect.y = 0;
 					pageData = new BitmapData(tempBmRect.width,tempBmRect.height,true,0);
 					pageData.copyPixels(tempBmData,tempBmRect,new Point(0,0),null,null,true);
 					data.bitmapList[bitmapIndex] = bitmapEncoder.encode(pageData);
