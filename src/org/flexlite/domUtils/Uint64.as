@@ -1,6 +1,7 @@
 package org.flexlite.domUtils
 {
 	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	
 	/**
 	 * 64位无符号整数
@@ -37,7 +38,7 @@ package org.flexlite.domUtils
 			cacheBytes = null;
 			cacheString = [];
 		}
-
+		
 		private var _lowerUint:uint = 0;
 		/**
 		 * 低32位整型数字
@@ -96,8 +97,16 @@ package org.flexlite.domUtils
 			try
 			{
 				bytes.position = postion;
-				_lowerUint = bytes.readUnsignedInt();
-				_higherUint = bytes.readUnsignedInt();
+				if(bytes.endian==Endian.LITTLE_ENDIAN)
+				{
+					_lowerUint = bytes.readUnsignedInt();
+					_higherUint = bytes.readUnsignedInt();
+				}
+				else
+				{
+					_higherUint = bytes.readUnsignedInt();
+					_lowerUint = bytes.readUnsignedInt();
+				}
 			}
 			catch(e:Error)
 			{
@@ -132,13 +141,14 @@ package org.flexlite.domUtils
 		 */		
 		private var cacheBytes:ByteArray;
 		/**
-		 * 返回数字的字节流数组形式
+		 * 返回数字的字节流数组形式,存储方式为Endian.LITTLE_ENDIAN。
 		 */		
 		public function get bytes():ByteArray
 		{
 			if(cacheBytes)
 				return cacheBytes;
 			cacheBytes = new ByteArray();
+			cacheBytes.endian = Endian.LITTLE_ENDIAN;
 			cacheBytes.writeUnsignedInt(_lowerUint);
 			cacheBytes.writeUnsignedInt(_higherUint);
 			return cacheBytes;
