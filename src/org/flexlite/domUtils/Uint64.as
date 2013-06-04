@@ -11,15 +11,13 @@ package org.flexlite.domUtils
 	{
 		/**
 		 * 构造函数
-		 * @param value 要转换为数字的字符串。
-		 * @param radix 要用于字符串到数字的转换的基数（从 2 到 36）。如果未指定 radix 参数，则默认值为 10。
+		 * @param lowerUint 低32位整型数字
+		 * @param higherUint 高32位整型数字
 		 */		
-		public function Uint64(value:String="",radix:uint=10)
+		public function Uint64(lowerUint:uint=0,higherUint:uint=0)
 		{
-			if(value)
-			{
-				fromString(value,radix);
-			}
+			_lowerUint = lowerUint;
+			_higherUint = higherUint;
 		}
 		
 		private var _higherUint:uint = 0;
@@ -131,10 +129,7 @@ package org.flexlite.domUtils
 		 */		
 		public function clone():Uint64
 		{
-			var u:Uint64 = new Uint64();
-			u.lowerUint = _lowerUint;
-			u.higherUint = _higherUint;
-			return u;
+			return new Uint64(_lowerUint,_higherUint);
 		}
 		/**
 		 * 缓存的字节流
