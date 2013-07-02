@@ -125,6 +125,7 @@ package org.flexlite.domDisplay.codec
 				var oldX:Number = dp.x;
 				var oldY:Number = dp.y;
 				var oldParent:DisplayObjectContainer = dp.parent;
+				var oldIndex:int = oldParent.getChildIndex(dp);
 				container.addChild(dp);
 				dp.x = -dpRect.x;
 				dp.y = -dpRect.y;
@@ -132,7 +133,7 @@ package org.flexlite.domDisplay.codec
 				var offsetPoint:Point = dxrData.frameOffsetList[frame];
 				offsetPoint.x = offsetPoint.x +Math.round(dpRect.x);
 				offsetPoint.y = offsetPoint.y +Math.round(dpRect.y);
-				oldParent.addChild(dp);
+				oldParent.addChildAt(dp,oldIndex);
 				dp.x = oldX;
 				dp.y = oldY;
 				stage.removeChild(container);
