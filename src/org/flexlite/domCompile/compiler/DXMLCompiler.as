@@ -131,7 +131,10 @@ package org.flexlite.domCompile.compiler
 		{
 			for each(var node:XML in items)
 			{
-				if(node.hasOwnProperty("@id"))
+				if(node.namespace()==DXML.FS)
+				{
+				}
+				else if(node.hasOwnProperty("@id"))
 				{
 					createVarForNode(node);
 					if(isStateNode(node))//检查节点是否只存在于一个状态里，需要延迟实例化
