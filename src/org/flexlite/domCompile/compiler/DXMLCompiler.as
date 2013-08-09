@@ -9,6 +9,7 @@ package org.flexlite.domCompile.compiler
 	import org.flexlite.domCompile.core.CpFunction;
 	import org.flexlite.domCompile.core.CpNotation;
 	import org.flexlite.domCompile.core.CpVariable;
+	import org.flexlite.domCore.DXML;
 	import org.flexlite.domCore.Injector;
 	import org.flexlite.domUtils.StringUtil;
 	
@@ -367,7 +368,7 @@ package org.flexlite.domCompile.compiler
 			for each(child in children)
 			{
 				prop = child.localName(); 
-				if(prop==DECLARATIONS||prop=="states")
+				if(prop==DECLARATIONS||prop=="states"||child.namespace()==DXML.FS)
 				{
 					continue;
 				}

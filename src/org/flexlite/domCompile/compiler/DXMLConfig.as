@@ -124,7 +124,11 @@ package org.flexlite.domCompile.compiler
 		public function getClassNameById(id:String, ns:Namespace):String
 		{
 			var name:String = "";
-			if(!ns||isDefaultNs(ns))
+			if(ns==DXML.FS)
+			{
+				
+			}
+			else if(!ns||isDefaultNs(ns))
 			{
 				name = idDic[id];
 			}
