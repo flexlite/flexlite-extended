@@ -86,6 +86,7 @@ package org.flexlite.domCompile.compiler
 			idDic = new Dictionary;
 			stateCode = new Vector.<CpState>();
 			stateIds = [];
+			declarations = null;
 			currentClass = new CpClass();
 			currentClass.notation = new CpNotation(
 				"@private\n此类由编译器自动生成，您应修改对应的DXML文件内容，然后重新编译，而不应直接修改其代码。\n@author DXMLCompiler");
@@ -107,6 +108,7 @@ package org.flexlite.domCompile.compiler
 			return resutlCode;
 		}
 		
+		private var declarations:XML;
 		/**
 		 * 开始编译
 		 */		
@@ -119,6 +121,27 @@ package org.flexlite.domCompile.compiler
 			{
 				currentXML.@currentState = stateCode[0].name;
 			}
+			
+			for each(var node:XML in currentXML.children())
+			{
+				if(node.localName()==DECLARATIONS)
+				{
+					declarations = node;
+					break;
+				}
+			}
+			
+			if(declarations)
+			{//清理声明节点里的状态标志
+				for each(node in declarations.children())
+				{
+					if(node.hasOwnProperty("@includeIn"))
+						delete node.@includeIn;
+					if(node.hasOwnProperty("@excludeFrom"))
+						delete node.@excludeFrom;
+				}
+			}
+			
 			addIds(currentXML.children());
 			
 			createConstructFunc();
@@ -380,14 +403,14 @@ package org.flexlite.domCompile.compiler
 					var childLength:int = child.children().length();
 					if(childLength==0)
 						continue;
-					
+					var isContainerProp:Boolean = (prop==property&&isArray);
 					if(childLength>1)
 					{
 						var values:Array = [];
 						for each(var item:XML in child.children())
 						{
 							childFunc = createFuncForNode(item);
-							if(prop!="elementsContent"||!isStateNode(item))
+							if(!isContainerProp||!isStateNode(item))
 								values.push(childFunc);
 						}
 						childFunc = "["+values.join(",")+"]";
@@ -396,10 +419,9 @@ package org.flexlite.domCompile.compiler
 					{
 						var firsChild:XML = child.children()[0];
 						childFunc = createFuncForNode(firsChild);
-						if(firsChild.localName()!="Array"&&
-							prop==property&&isArray)
+						if(firsChild.localName()!="Array"&&isContainerProp)
 						{
-							if(prop!="elementsContent"||!isStateNode(item))
+							if(!isStateNode(item))
 								childFunc = "["+childFunc+"]";
 							else
 								childFunc = "[]";
@@ -544,19 +566,11 @@ package org.flexlite.domCompile.compiler
 			var varName:String = KeyWords.KW_THIS;
 			addAttributesToCodeBlock(cb,varName,currentXML);
 			
-			var declarations:XML;
-			for each(var node:XML in currentXML.children())
-			{
-				if(node.localName()==DECLARATIONS)
-				{
-					declarations = node;
-					break;
-				}
-			}
 			if(declarations&&declarations.children().length()>0)
 			{
 				for each(var decl:XML in declarations.children())
 				{
+					
 					var funcName:String = createFuncForNode(decl);
 					if(funcName!="")
 					{
