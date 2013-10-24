@@ -22,6 +22,8 @@ package org.flexlite.domCompile.compiler
 					defaultProp = String(item.@d);
 				if(item.hasOwnProperty("@array"))
 					isArray = Boolean(item.@array=="true");
+				if(item.hasOwnProperty("@state"))
+					states = String(item.@state).split(",");
 			}
 		}
 		/**
@@ -44,5 +46,9 @@ package org.flexlite.domCompile.compiler
 		 * 默认属性是否为数组类型
 		 */	
 		public var isArray:Boolean = false;
+		/**
+		 * 视图状态列表
+		 */		
+		public var states:Array;
 	}
 }

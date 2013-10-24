@@ -50,6 +50,7 @@ package org.flexlite.domCompile.utils
 			var show:Boolean;
 			var d:String;
 			var array:Boolean;
+			var states:Array = [];
 			
 			var found:Boolean = false;
 			for each(var meta:XML in info.factory.metadata)
@@ -74,6 +75,16 @@ package org.flexlite.domCompile.utils
 					}
 					catch(e:Error){}
 				}
+				else if(meta.@name=="SkinState")
+				{
+					try
+					{
+						var state:String = String(meta.arg[0].@value);
+						if(state)
+							states.splice(0,0,state);
+					}
+					catch(e:Error){}
+				}
 			}
 			if(!found)
 				return null;
@@ -87,6 +98,8 @@ package org.flexlite.domCompile.utils
 				component.@show = "true";
 			if(array)
 				component.@array = "true";
+			if(states.length>0)
+				component.@state = states.join(",");
 			return component;
 		}
 		

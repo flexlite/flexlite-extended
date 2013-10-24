@@ -62,6 +62,8 @@ package org.flexlite.domCompile.compiler
 				{
 					component.defaultProp = prop;
 					component.isArray = superComp.isArray;
+					if(superComp.states)
+						component.states = superComp.states;
 				}
 			}
 			return component.defaultProp;
