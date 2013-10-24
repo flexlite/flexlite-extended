@@ -36,10 +36,49 @@ package org.flexlite.domCompile.compiler
 		 * 配置管理器实例
 		 */		
 		private var dxmlConfig:IDXMLConfig;
+		
+		/**
+		 * 获取重复的ID名
+		 */		
+		public function getRepeatedIds(xml:XML):Array
+		{
+			var result:Array = [];
+			getIds(xml,result);
+			repeatedIdDic = new Dictionary();
+			return result;
+		}
+		
+		private var repeatedIdDic:Dictionary = new Dictionary();
+		
+		private function getIds(xml:XML,result:Array):void
+		{
+			if(xml.namespace()!=DXML.FS&&xml.hasOwnProperty("@id"))
+			{
+				var id:String = xml.@id;
+				if(repeatedIdDic[id])
+				{
+					if(result.indexOf(id)==-1)
+						result.push(id);
+				}
+				else
+				{
+					repeatedIdDic[id] = true;
+				}
+			}
+			for each(var node:XML in xml.children())
+			{
+				getIds(node,result);
+			}
+		}
+		
 		/**
 		 * 当前类 
 		 */		
 		private var currentClass:CpClass;
+		/**
+		 * 当前编译的类名
+		 */		
+		private var currentClassName:String;
 		/**
 		 * 当前要编译的DXML文件 
 		 */		
@@ -56,6 +95,7 @@ package org.flexlite.domCompile.compiler
 		 * 需要延迟创建的实例id列表
 		 */		
 		private var stateIds:Array = [];
+		
 		/**
 		 * 编译指定的XML对象为ActionScript类。
 		 * 注意:编译前要先注入flexlite-manifest.xml清单文件给manifestData属性。 清单文件可以用ManifestUtil类生成。
@@ -83,6 +123,7 @@ package org.flexlite.domCompile.compiler
 			}
 			currentXML = new XML(xmlData);	
 			className = className.split("::").join(".");
+			currentClassName = className;
 			idDic = new Dictionary;
 			stateCode = new Vector.<CpState>();
 			stateIds = [];
@@ -526,6 +567,8 @@ package org.flexlite.domCompile.compiler
 				switch(type)
 				{
 					case "Class":
+						if(value==currentClassName)//防止无限循环。
+							return "null";
 						currentClass.addImport(value);
 						break;
 					case "uint":
