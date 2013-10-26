@@ -368,12 +368,16 @@ package org.flexlite.domUtils
 						result.push(file);
 					}
 				}
-				else if(extension&&file.extension)
+				else if(extension)
 				{
-					if(file.extension.toLowerCase() == extension)
+					if(file.extension&&file.extension.toLowerCase() == extension)
 					{
 						result.push(file);
 					}
+				}
+				else
+				{
+					result.push(file);
 				}
 			}
 		}
