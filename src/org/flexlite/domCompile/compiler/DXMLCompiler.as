@@ -781,11 +781,11 @@ package org.flexlite.domCompile.compiler
 						var stateNames:Array = [];
 						if(node.hasOwnProperty("@includeIn"))
 						{
-							stateNames = node.@includeIn.toString().split(".");
+							stateNames = node.@includeIn.toString().split(",");
 						}
 						else
 						{
-							var excludeNames:Array = node.@excludeFrom.toString().split(".");
+							var excludeNames:Array = node.@excludeFrom.toString().split(",");
 							for each(state in stateCode)
 							{
 								if(excludeNames.indexOf(state.name)==-1)
