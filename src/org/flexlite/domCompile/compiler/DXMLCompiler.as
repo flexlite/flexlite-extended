@@ -866,61 +866,68 @@ package org.flexlite.domCompile.compiler
 		private function findNearNodeId(node:XML):Object
 		{
 			var parentNode:XML = node.parent();
-			var item:XML;
 			var targetId:String = "";
 			var postion:String;
-			var index:int = node.childIndex();
+			var index:int = -1;
+			var totalCount:int = 0;
+			var preItem:XML;
+			var afterItem:XML;
+			var found:Boolean = false;
+			for each(var item:XML in parentNode.children())
+			{
+				if(isProperty(item))
+					continue;
+				if(item==node)
+				{
+					found = true;
+					index = totalCount;
+				}
+				else
+				{
+					if(found&&!afterItem&&!isStateNode(item))
+					{
+						afterItem = item;
+					}
+				}
+				if(!found&&!isStateNode(item))
+					preItem = item;
+				totalCount++;
+			}
 			if(index==0)
 			{
 				postion = "first";
 				return {position:postion,relativeTo:targetId};
 			}
-			if(index==parentNode.children().length()-1)
+			if(index==totalCount-1)
 			{
 				postion = "last";
 				return {position:postion,relativeTo:targetId};
 			}
 			
-			postion = "after";
-			index--;
-			while(index>=0)
+			if(preItem)
 			{
-				item = parentNode.children()[index];
-				if(!isStateNode(item)&&item.hasOwnProperty("@id"))
+				postion = "after";
+				targetId = preItem.@id;
+				if(targetId)
 				{
-					targetId = item.@id;
-					break;
+					createVarForNode(preItem);
+					return {position:postion,relativeTo:targetId};
 				}
-				index--;
-			}
-			if(targetId!="")
-			{
-				createVarForNode(item);
-				return {position:postion,relativeTo:targetId};
+				
 			}
 			
-			postion = "before";
-			index = node.childIndex();
-			index++;
-			while(index<parentNode.children().length())
+			if(afterItem)
 			{
-				item = parentNode.children()[index];
-				if(!isStateNode(item)&&item.hasOwnProperty("@id"))
+				postion = "before";
+				targetId = afterItem.@id;
+				if(targetId)
 				{
-					targetId = item.@id;
-					break;
+					createVarForNode(afterItem);
+					return {position:postion,relativeTo:targetId};
 				}
-				index++;
+				
 			}
-			if(targetId!="")
-			{
-				createVarForNode(item);
-				return {position:postion,relativeTo:targetId};
-			}
-			else
-			{
-				return {position:"last",relativeTo:targetId};
-			}
+			return {position:"last",relativeTo:targetId};
 		}
 		
 		
