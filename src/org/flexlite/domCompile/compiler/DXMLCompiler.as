@@ -92,7 +92,7 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private var stateCode:Vector.<CpState>;
 		/**
-		 * 需要延迟创建的实例id列表
+		 * 需要单独创建的实例id列表
 		 */		
 		private var stateIds:Array = [];
 		
@@ -126,12 +126,11 @@ package org.flexlite.domCompile.compiler
 			currentClassName = className;
 			idDic = new Dictionary;
 			stateCode = new Vector.<CpState>();
-			stateIds = [];
 			declarations = null;
 			currentClass = new CpClass();
+			stateIds = [];
 			currentClass.notation = new CpNotation(
 				"@private\n此类由编译器自动生成，您应修改对应的DXML文件内容，然后重新编译，而不应直接修改其代码。\n@author DXMLCompiler");
-			
 			
 			var index:int = className.lastIndexOf(".");
 			if(index!=-1)
@@ -201,7 +200,7 @@ package org.flexlite.domCompile.compiler
 				else if(node.hasOwnProperty("@id"))
 				{
 					createVarForNode(node);
-					if(isStateNode(node))//检查节点是否只存在于一个状态里，需要延迟实例化
+					if(isStateNode(node))//检查节点是否只存在于一个状态里，需要单独实例化
 						stateIds.push(String(node.@id));
 				}
 				else if(getPackageByNode(node)!="")
@@ -209,21 +208,6 @@ package org.flexlite.domCompile.compiler
 					createIdForNode(node);
 					if(isStateNode(node))
 						stateIds.push(String(node.@id));
-					if(containsState(node))
-					{
-						createVarForNode(node);
-						
-						var parentNode:XML = node.parent() as XML;
-						if(parentNode.localName()=="Array")
-							parentNode = parentNode.parent() as XML;
-						if(isProperty(parentNode))
-							parentNode = parentNode.parent() as XML;
-						if(isStateNode(node)&&parentNode!=null&&parentNode!=currentXML
-							&&!currentClass.containsVar(getNodeId(parentNode)))
-						{
-							createVarForNode(parentNode);
-						}
-					}
 				}
 				addIds(node.children());
 			}
@@ -626,21 +610,17 @@ package org.flexlite.domCompile.compiler
 			var property:String = obj.name;
 			var isArray:Boolean = obj.isArray;
 			initlizeChildNode(cb,currentXML.children(),property,isArray,varName);
-			
-			cb.addEmptyLine();
 			var id:String;
 			if(stateIds.length>0)
 			{
-				currentClass.addImport(FACTORY_CLASS_PACKAGE);
 				for each(id in stateIds)
 				{
-					var name:String = id+"_factory";
-					var value:String = "new "+FACTORY_CLASS_PACKAGE+"("+id+"_i)";
-					cb.addVar(name,FACTORY_CLASS_PACKAGE,value);
+					cb.addCodeLine(id+"_i();");
 				}
 				cb.addEmptyLine();
 			}
-			
+			cb.addEmptyLine();
+
 			//生成视图状态代码
 			createStates(currentXML.children());
 			var states:Vector.<CpState>;
@@ -764,6 +744,7 @@ package org.flexlite.domCompile.compiler
 				if(containsState(node))
 				{
 					var id:String = node.@id;
+					checkIdForState(node);
 					var stateName:String;
 					var states:Vector.<CpState>;
 					var state:CpState;
@@ -776,7 +757,10 @@ package org.flexlite.domCompile.compiler
 						if(isProperty(parentNode))
 							parentNode = parentNode.parent() as XML;
 						if(parentNode!=null&&parentNode != currentXML)
+						{
 							propertyName = parentNode.@id;
+							checkIdForState(parentNode);
+						}
 						var positionObj:Object = findNearNodeId(node);
 						var stateNames:Array = [];
 						if(node.hasOwnProperty("@includeIn"))
@@ -799,8 +783,10 @@ package org.flexlite.domCompile.compiler
 							if(states.length>0)
 							{
 								for each(state in states)
-								state.addOverride(new CpAddItems(id+"_factory",propertyName,
-									positionObj.position,positionObj.relativeTo));
+								{
+									state.addOverride(new CpAddItems(id,propertyName,
+										positionObj.position,positionObj.relativeTo));
+								}
 							}
 						}
 					}
@@ -826,6 +812,30 @@ package org.flexlite.domCompile.compiler
 				}
 			}
 			
+		}
+		/**
+		 * 检查指定的ID是否创建了类成员变量，若没创建则为其创建。
+		 */		
+		private function checkIdForState(node:XML):void
+		{
+			if(!node||currentClass.containsVar(node.@id))
+			{
+				return;
+			}
+			createVarForNode(node);
+			var id:String = node.@id;
+			var funcName:String = id+"_i";
+			var func:CpFunction = currentClass.getFuncByName(funcName);
+			if(!func)
+				return;
+			var codeLine:String = id+" = temp;";
+			var cb:CpCodeBlock = func.codeBlock;
+			if(!cb)
+				return;
+			if(cb.getCodeLineAt(1)!=codeLine)
+			{
+				cb.addCodeLineAt(codeLine,1);
+			}
 		}
 		/**
 		 * 通过视图状态名称获取对应的视图状态
@@ -910,7 +920,7 @@ package org.flexlite.domCompile.compiler
 				targetId = preItem.@id;
 				if(targetId)
 				{
-					createVarForNode(preItem);
+					checkIdForState(preItem);
 					return {position:postion,relativeTo:targetId};
 				}
 				
@@ -922,7 +932,7 @@ package org.flexlite.domCompile.compiler
 				targetId = afterItem.@id;
 				if(targetId)
 				{
-					createVarForNode(afterItem);
+					checkIdForState(afterItem);
 					return {position:postion,relativeTo:targetId};
 				}
 				
@@ -930,11 +940,6 @@ package org.flexlite.domCompile.compiler
 			return {position:"last",relativeTo:targetId};
 		}
 		
-		
-		
-		private static const FACTORY_CLASS_PACKAGE:String = "org.flexlite.domUI.core.DeferredInstanceFromFunction";
-		
-		private static const FACTORY_CLASS:String = "DeferredInstanceFromFunction";
 		
 		private static const STATE_CLASS_PACKAGE:String = "org.flexlite.domUI.states.State";
 		
@@ -1041,10 +1046,10 @@ class CpState extends CodeBase
  */
 class CpAddItems extends CodeBase
 {
-	public function CpAddItems(targetFactory:String,propertyName:String,position:String,relativeTo:String)
+	public function CpAddItems(target:String,propertyName:String,position:String,relativeTo:String)
 	{
 		super();
-		this.targetFactory = targetFactory;
+		this.target = target;
 		this.propertyName = propertyName;
 		this.position = position;
 		this.relativeTo = relativeTo;
@@ -1053,7 +1058,7 @@ class CpAddItems extends CodeBase
 	/**
 	 * 创建项目的工厂类实例 
 	 */		
-	public var targetFactory:String;
+	public var target:String;
 	
 	/**
 	 * 要添加到的属性 
@@ -1074,7 +1079,7 @@ class CpAddItems extends CodeBase
 	{
 		var indentStr:String = getIndent(1);
 		var returnStr:String = "new org.flexlite.domUI.states.AddItems().initializeFromObject({\n";
-		returnStr += indentStr+"targetFactory:"+targetFactory+",\n";
+		returnStr += indentStr+"target:\""+target+"\",\n";
 		returnStr += indentStr+"propertyName:\""+propertyName+"\",\n";
 		returnStr += indentStr+"position:\""+position+"\",\n";
 		returnStr += indentStr+"relativeTo:\""+relativeTo+"\"\n})";

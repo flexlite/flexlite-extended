@@ -44,6 +44,7 @@ package org.flexlite.domCompile.core
 			}
 			addCodeLine(target+propStr+" = "+value+";");
 		}
+
 		/**
 		 * 添加返回值语句
 		 */		
@@ -124,19 +125,33 @@ package org.flexlite.domCompile.core
 			addCodeLine(functionName+"("+argsStr+")");
 		}
 		
-		private var codeStr:String = "";
+		private var lines:Array = [];
 		
 		/**
 		 * 添加一行代码
 		 */		
 		public function addCodeLine(code:String):void
 		{
-			codeStr += getIndent()+code+"\n";
+			lines.push(getIndent()+code);
+		}
+		/**
+		 * 添加一行代码到指定行
+		 */		
+		public function addCodeLineAt(code:String,index:int):void
+		{
+			lines.splice(index,0,getIndent()+code);
+		}
+		/**
+		 * 返回指定行的代码
+		 */		
+		public function getCodeLineAt(index:int):String
+		{
+			return lines[index];
 		}
 		
 		override public function toCode():String
 		{
-			return codeStr.substr(0,codeStr.length-1);
+			return lines.join("\n");
 		}
 	}
 }

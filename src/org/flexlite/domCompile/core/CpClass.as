@@ -227,6 +227,20 @@ package org.flexlite.domCompile.core
 			}
 			return false;
 		}
+		/**
+		 * 根据函数名返回函数定义块
+		 */		
+		public function getFuncByName(name:String):CpFunction
+		{
+			for each(var item:CpFunction in functionBlock)
+			{
+				if(item.name==name)
+				{
+					return item;
+				}
+			}
+			return null;
+		}
 		
 		/**
 		 * 对函数列表进行排序
