@@ -392,7 +392,16 @@ package org.flexlite.domUtils
 		public static function url2Path(url:String):String
 		{
 			url = escapeUrl(url);
-			return File.applicationDirectory.resolvePath(url).nativePath;
+			var path:String = File.applicationDirectory.resolvePath(url).nativePath;
+			return escapeUrl(path);
+		}
+		/**
+		 * 将本地路径转换为url
+		 */		
+		public static function path2Url(path:String):String
+		{
+			path = escapeUrl(path);
+			return File.applicationDirectory.resolvePath(path).url;
 		}
 		/**
 		 * 指定路径的文件或文件夹是否存在
