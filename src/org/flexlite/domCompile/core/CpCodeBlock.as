@@ -142,11 +142,18 @@ package org.flexlite.domCompile.core
 			lines.splice(index,0,getIndent()+code);
 		}
 		/**
-		 * 返回指定行的代码
+		 * 是否存在某行代码内容
 		 */		
-		public function getCodeLineAt(index:int):String
+		public function containsCodeLine(code:String):Boolean
 		{
-			return lines[index];
+			return lines.indexOf(code)!=-1;
+		}
+		/**
+		 * 在结尾追加另一个代码块的内容
+		 */		
+		public function concat(cb:CpCodeBlock):void
+		{
+			lines = lines.concat(cb.lines);
 		}
 		
 		override public function toCode():String

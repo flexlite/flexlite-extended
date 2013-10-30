@@ -122,6 +122,7 @@ package org.flexlite.domCompile.compiler
 				}
 			}
 			currentXML = new XML(xmlData);	
+			delayAssignmentDic = new Dictionary();
 			className = className.split("::").join(".");
 			currentClassName = className;
 			idDic = new Dictionary;
@@ -288,7 +289,8 @@ package org.flexlite.domCompile.compiler
 				return createBasicTypeForNode(node);
 			var func:CpFunction = new CpFunction;
 			var tailName:String = "_i";
-			func.name = node.@id+tailName;
+			var id:String = node.@id;
+			func.name = id+tailName;
 			func.returnType = packageName;
 			var cb:CpCodeBlock = new CpCodeBlock;
 			var varName:String = "temp";
@@ -315,7 +317,10 @@ package org.flexlite.domCompile.compiler
 			var isArray:Boolean = obj.isArray;
 			
 			initlizeChildNode(cb,children,property,isArray,varName);
-			
+			if(delayAssignmentDic[id])
+			{
+				cb.concat(delayAssignmentDic[id]);
+			}
 			cb.addReturn(varName);
 			func.codeBlock = cb;
 			currentClass.addFunction(func);
@@ -381,6 +386,10 @@ package org.flexlite.domCompile.compiler
 			return returnValue;
 		}
 		/**
+		 * 延迟赋值字典
+		 */		
+		private var delayAssignmentDic:Dictionary = new Dictionary();
+		/**
 		 * 将节点属性赋值语句添加到代码块
 		 */		
 		private function addAttributesToCodeBlock(cb:CpCodeBlock,varName:String,node:XML):void
@@ -401,6 +410,30 @@ package org.flexlite.domCompile.compiler
 				value = node["@"+key].toString();
 				key = formatKey(key,value);
 				value  = formatValue(key,value,node);
+				if(currentClass.containsVar(value))
+				{//赋的值对象是一个id
+					var id:String = node.@id;
+					var codeLine:String = id+" = temp;";
+					if(!currentClass.containsVar(id))
+						createVarForNode(node);
+					if(!cb.containsCodeLine(codeLine))
+					{
+						cb.addCodeLineAt(codeLine,1);
+					}
+					var delayCb:CpCodeBlock = new CpCodeBlock();
+					if(varName==KeyWords.KW_THIS)
+					{
+						delayCb.addAssignment(varName,value,key);
+					}
+					else
+					{
+						
+						delayCb.startIf(id);
+						delayCb.addAssignment(id,value,key);
+						delayCb.endBlock();
+					}
+					delayAssignmentDic[value] = delayCb;
+				}
 				cb.addAssignment(varName,value,key);
 			}
 		}
@@ -832,7 +865,7 @@ package org.flexlite.domCompile.compiler
 			var cb:CpCodeBlock = func.codeBlock;
 			if(!cb)
 				return;
-			if(cb.getCodeLineAt(1)!=codeLine)
+			if(!cb.containsCodeLine(codeLine))
 			{
 				cb.addCodeLineAt(codeLine,1);
 			}
