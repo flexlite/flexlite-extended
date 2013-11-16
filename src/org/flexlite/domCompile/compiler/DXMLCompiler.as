@@ -476,14 +476,31 @@ package org.flexlite.domCompile.compiler
 					else
 					{
 						var firsChild:XML = child.children()[0];
-						childFunc = createFuncForNode(firsChild);
-						if(firsChild.localName()!="Array"&&isContainerProp)
+						if(isContainerProp)
 						{
-							if(!isStateNode(item))
-								childFunc = "["+childFunc+"]";
+							if(firsChild.localName()=="Array")
+							{
+								values = [];
+								for each(item in firsChild.children())
+								{
+									childFunc = createFuncForNode(item);
+									if(!isContainerProp||!isStateNode(item))
+										values.push(childFunc);
+								}
+								childFunc = "["+values.join(",")+"]";
+							}
 							else
-								childFunc = "[]";
-							
+							{
+								childFunc = createFuncForNode(firsChild);
+								if(!isStateNode(item))
+									childFunc = "["+childFunc+"]";
+								else
+									childFunc = "[]";
+							}
+						}
+						else
+						{
+							childFunc = createFuncForNode(firsChild);
 						}
 					}
 					if(childFunc!="")
