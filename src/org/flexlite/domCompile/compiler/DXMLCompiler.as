@@ -963,19 +963,6 @@ package org.flexlite.domCompile.compiler
 				postion = "last";
 				return {position:postion,relativeTo:targetId};
 			}
-			
-			if(preItem)
-			{
-				postion = "after";
-				targetId = preItem.@id;
-				if(targetId)
-				{
-					checkIdForState(preItem);
-					return {position:postion,relativeTo:targetId};
-				}
-				
-			}
-			
 			if(afterItem)
 			{
 				postion = "before";
@@ -987,6 +974,18 @@ package org.flexlite.domCompile.compiler
 				}
 				
 			}
+			//若有多个状态节点，由于是按数组顺序添加的，使用after会导致状态节点反序。
+//			if(preItem)
+//			{
+//				postion = "after";
+//				targetId = preItem.@id;
+//				if(targetId)
+//				{
+//					checkIdForState(preItem);
+//					return {position:postion,relativeTo:targetId};
+//				}
+//				
+//			}
 			return {position:"last",relativeTo:targetId};
 		}
 		
