@@ -152,6 +152,29 @@ package org.flexlite.domDisplay.utils
 				return null;
 			return DxrEncoder.writeObject({keyList:keyList});
 		}
+		/**
+		 * 从一个Dxr文件字节流中提取指定键的素材合并成一个新的字节流。
+		 */		
+		public static function extractBytes(bytes:ByteArray,keys:Array):ByteArray
+		{
+			if(!bytes)
+				return null;
+			var keyObject:Object = DxrDecoder.readObject(bytes);
+			for(var key:String in keyObject.keyList)
+			{
+				if(keys.indexOf(key)==-1)
+					delete keyObject.keyList[key];
+			}
+			var has:Boolean = false;
+			for(key in keyObject.keyList)
+			{
+				has = true;
+				break;
+			}
+			if(!has)
+				return null;
+			return DxrEncoder.writeObject(keyObject);
+		}
 		
 		/**
 		 * 为指定的显示对象生成唯一的key

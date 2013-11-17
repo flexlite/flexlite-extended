@@ -302,6 +302,20 @@ package org.flexlite.domUtils
 			return path.substr(0,endIndex+1);
 		}
 		/**
+		 * 获得路径的扩展名
+		 */		
+		public static function getExtension(path:String):String
+		{
+			path = escapeUrl(path);
+			var index:int = path.lastIndexOf(".");
+			if(index==-1)
+				return "";
+			var i:int = path.lastIndexOf("/");
+			if(i>index)
+				return "";
+			return path.substring(index+1);
+		}
+		/**
 		 * 获取路径的文件名(不含扩展名)或文件夹名
 		 */		
 		public static function getFileName(path:String):String
