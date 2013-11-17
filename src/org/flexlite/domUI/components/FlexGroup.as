@@ -80,6 +80,7 @@ package org.flexlite.domUI.components
 		override protected function measure():void
 		{
 			super.measure();
+			contentGroup.validateSize(true);
 			measuredWidth = contentGroup.preferredWidth;
 			measuredHeight = contentGroup.preferredHeight;
 		}
@@ -196,6 +197,18 @@ package org.flexlite.domUI.components
 		public function swapElementsAt(index1:int, index2:int):void
 		{
 			contentGroup.swapElementsAt(index1,index2);
+		}
+		
+		override public function invalidateDisplayList():void
+		{
+			super.invalidateDisplayList();
+			contentGroup.invalidateDisplayList();
+		}
+		
+		override public function invalidateSize():void
+		{
+			super.invalidateSize();
+			contentGroup.invalidateSize();
 		}
 		/**
 		 * 确定指定的 IVisualElement 是否为容器实例的子代或该实例本身。将进行深度搜索，即，如果此元素是该容器的子代、孙代、曾孙代等，它将返回 true。
