@@ -24,6 +24,7 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.TagPlaceObject;
 	import com.codeazur.as3swf.tags.TagPlaceObject2;
 	import com.codeazur.as3swf.tags.TagPlaceObject3;
+	import com.codeazur.as3swf.tags.TagRemoveObject;
 	import com.codeazur.as3swf.tags.TagSetBackgroundColor;
 	import com.codeazur.as3swf.tags.TagShowFrame;
 	import com.codeazur.as3swf.tags.TagSymbolClass;
@@ -45,6 +46,8 @@ package org.flexlite.domUtils
 		{
 			if(!swfBytesList||swfBytesList.length==0)
 				return null;
+			if(swfBytesList.length==1)
+				return swfBytesList[0];
 			var infoList:Vector.<TagInfo> = new Vector.<TagInfo>();
 			for each(var bytes:ByteArray in swfBytesList)
 			{
@@ -73,6 +76,7 @@ package org.flexlite.domUtils
 			tags.splice(0,0,new TagFileAttributes());
 			
 			var newSwf:SWF = new SWF();
+			newSwf.frameRate = 24;
 			for each(var tag:ITag in tags)
 			{
 				newSwf.tags.push(tag);
@@ -118,7 +122,7 @@ package org.flexlite.domUtils
 			var tag:Object;
 			for each(tag in info.tags)
 			{
-				if(tag  is IDefinitionTag)
+				if(tag  is IDefinitionTag&&!(tag is TagDefineScalingGrid))
 				{
 					var isBitmap:Boolean = (tag is TagDefineBits||tag is TagDefineBitsLossless);
 					replaceId(info,IDefinitionTag(tag).characterId,characterId,isBitmap);
@@ -140,11 +144,22 @@ package org.flexlite.domUtils
 				{
 					for each(tag in TagDefineSprite(tag).tags)
 					{
-						if(tag is TagPlaceObject&&TagPlaceObject(tag).characterId==oldId)
+						if(tag is TagPlaceObject)
 						{
-							TagPlaceObject(tag).characterId = newId;
+							if(TagPlaceObject(tag).characterId==oldId)
+								TagPlaceObject(tag).characterId = newId;
+						}
+						else if(tag is TagRemoveObject)
+						{
+							if(TagRemoveObject(tag).characterId==oldId)
+								TagRemoveObject(tag).characterId = newId;
 						}
 					}
+				}
+				else if(tag is TagDefineScalingGrid)
+				{
+					if(TagDefineScalingGrid(tag).characterId==oldId)
+						TagDefineScalingGrid(tag).characterId = newId;
 				}
 				else if(checkShape&&tag is TagDefineShape)
 				{
