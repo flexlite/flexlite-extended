@@ -552,12 +552,15 @@ package org.flexlite.domCompile.compiler
 			return firstChar<"A"||firstChar>"Z";
 		}
 		/**
+		 * 命名空间为fs的属性名列表
+		 */		
+		public static var fsKeys:Vector.<String> = new <String>["id","locked","includeIn","excludeFrom"];
+		/**
 		 * 是否是普通赋值的key
 		 */		
 		private function isNormalKey(key:String):Boolean
 		{
-			if(key==null||key==""||key=="id"||key=="includeIn"
-				||key == "excludeFrom"||key.indexOf(".")!=-1)
+			if(!key||key.indexOf(".")!=-1||fsKeys.indexOf(key)!=-1)
 				return false;
 			return true;
 		}
