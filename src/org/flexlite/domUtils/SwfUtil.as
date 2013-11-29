@@ -20,6 +20,7 @@ package org.flexlite.domUtils
 	import com.codeazur.as3swf.tags.TagDoABC;
 	import com.codeazur.as3swf.tags.TagEnd;
 	import com.codeazur.as3swf.tags.TagFileAttributes;
+	import com.codeazur.as3swf.tags.TagJPEGTables;
 	import com.codeazur.as3swf.tags.TagMetadata;
 	import com.codeazur.as3swf.tags.TagPlaceObject;
 	import com.codeazur.as3swf.tags.TagPlaceObject2;
@@ -354,6 +355,15 @@ package org.flexlite.domUtils
 					break;
 				}
 			}
+			var jpegTableTag:TagJPEGTables;
+			for(i=0;i<length;i++)
+			{
+				if(oldTags[i] is TagJPEGTables)
+				{
+					jpegTableTag = oldTags[i] as TagJPEGTables;
+					break;
+				}
+			}
 			length = symbolTag.symbols.length;
 			var symbol:SWFSymbol;
 			var newSymbolTag:TagSymbolClass = new TagSymbolClass();
@@ -380,6 +390,10 @@ package org.flexlite.domUtils
 			newTags.push(newSymbolTag);
 			newTags.push(new TagShowFrame);
 			newTags.push(new TagEnd);
+			if(jpegTableTag)
+			{
+				newTags.splice(0,0,jpegTableTag);
+			}
 			newTags.splice(0,0,new TagFileAttributes());
 			
 			var newSwf:SWF = new SWF();
