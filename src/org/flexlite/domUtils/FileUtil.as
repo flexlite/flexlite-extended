@@ -406,8 +406,10 @@ package org.flexlite.domUtils
 		public static function url2Path(url:String):String
 		{
 			url = escapeUrl(url);
-			var path:String = File.applicationDirectory.resolvePath(url).nativePath;
-			return escapeUrl(path);
+			var file:File = File.applicationDirectory.resolvePath(url);
+			if(url.indexOf("file:")==0)
+				file.url = url;
+			return escapeUrl(file.nativePath);
 		}
 		/**
 		 * 将本地路径转换为url
@@ -424,6 +426,8 @@ package org.flexlite.domUtils
 		{
 			path = escapeUrl(path);
 			var file:File = File.applicationDirectory.resolvePath(path);
+			if(path.indexOf("file:")==0)
+				file.url = path;
 			return file.exists;
 		}
 		/**
