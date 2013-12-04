@@ -58,7 +58,7 @@ package org.flexlite.domUI.components
 		override protected function validateSkinState():void
 		{
 			super.validateSkinState();
-			var curSkin:Object = getCurrentSkin();
+			var curSkin:Object = skinObject;
 			if(curSkin is MovieClip)
 			{
 				(curSkin as MovieClip).gotoAndStop(frameDic[getCurrentSkinState()]);
