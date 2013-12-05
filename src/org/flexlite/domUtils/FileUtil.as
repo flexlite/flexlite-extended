@@ -20,7 +20,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function save(path:String,data:Object):Boolean
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			if(file.exists)
 			{//如果存在，先删除，防止出现文件名大小写不能覆盖的问题
@@ -60,7 +60,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function open(path:String):FileStream
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			var fs:FileStream = new FileStream;
 			try
@@ -79,7 +79,7 @@ package org.flexlite.domUtils
 		 */
 		public static function openAsByteArray(path:String):ByteArray
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var fs:FileStream = open(path);
 			if(!fs)
 				return null;
@@ -95,7 +95,7 @@ package org.flexlite.domUtils
 		 */	
 		public static function openAsString(path:String):String
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var fs:FileStream = open(path);
 			if(!fs)
 				return "";
@@ -115,7 +115,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function browseForOpen(onSelect:Function,type:int=1,typeFilter:Array=null,title:String="浏览文件",defaultPath:String=""):void
 		{
-			defaultPath = escapeUrl(defaultPath);
+			defaultPath = escapePath(defaultPath);
 			var file:File;
 			if(defaultPath=="")
 				file = new File;
@@ -152,7 +152,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function browseForSave(onSelect:Function,defaultPath:String=null,title:String="保存文件"):void
 		{
-			defaultPath = escapeUrl(defaultPath);
+			defaultPath = escapePath(defaultPath);
 			var file:File
 			if(defaultPath!=null)
 				file = File.applicationDirectory.resolvePath(defaultPath);
@@ -172,7 +172,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function browseAndSave(data:Object,defaultPath:String=null,title:String="保存文件"):void
 		{
-			defaultPath = escapeUrl(defaultPath);
+			defaultPath = escapePath(defaultPath);
 			var file:File
 			if(defaultPath!=null)
 				file = File.applicationDirectory.resolvePath(defaultPath);
@@ -192,8 +192,8 @@ package org.flexlite.domUtils
 		 */		
 		public static function moveTo(source:String,dest:String,overwrite:Boolean=false):Boolean
 		{
-			source = escapeUrl(source);
-			dest = escapeUrl(dest);
+			source = escapePath(source);
+			dest = escapePath(dest);
 			if(source==dest)
 				return true;
 			var file:File = new File(File.applicationDirectory.resolvePath(source).nativePath);
@@ -220,8 +220,8 @@ package org.flexlite.domUtils
 		 */	
 		public static function copyTo(source:String,dest:String,overwrite:Boolean=false):Boolean
 		{
-			source = escapeUrl(source);
-			dest = escapeUrl(dest);
+			source = escapePath(source);
+			dest = escapePath(dest);
 			if(source==dest)
 				return true;
 			var file:File = File.applicationDirectory.resolvePath(source);
@@ -247,7 +247,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function deletePath(path:String,moveToTrash:Boolean = false):Boolean
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var file:File = new File(File.applicationDirectory.resolvePath(path).nativePath);
 			if(moveToTrash)
 			{
@@ -347,7 +347,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function search(dir:String,extension:String=null,filterFunc:Function=null):Array
 		{
-			dir = escapeUrl(dir);
+			dir = escapePath(dir);
 			var file:File = File.applicationDirectory.resolvePath(dir);
 			var result:Array = [];
 			if(!file.isDirectory)
@@ -405,10 +405,8 @@ package org.flexlite.domUtils
 		 */		
 		public static function url2Path(url:String):String
 		{
-			url = escapeUrl(url);
+			url = escapePath(url);
 			var file:File = File.applicationDirectory.resolvePath(url);
-			if(url.indexOf("file:")==0)
-				file.url = url;
 			return escapeUrl(file.nativePath);
 		}
 		/**
@@ -416,7 +414,7 @@ package org.flexlite.domUtils
 		 */		
 		public static function path2Url(path:String):String
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			return File.applicationDirectory.resolvePath(path).url;
 		}
 		/**
@@ -424,11 +422,31 @@ package org.flexlite.domUtils
 		 */		
 		public static function exists(path:String):Boolean
 		{
-			path = escapeUrl(path);
+			path = escapePath(path);
 			var file:File = File.applicationDirectory.resolvePath(path);
-			if(path.indexOf("file:")==0)
-				file.url = path;
 			return file.exists;
+		}
+		/**
+		 * 转换本机路径或url为Unix风格路径。
+		 */		
+		public static function escapePath(path:String):String
+		{
+			if(!path)
+				return "";
+			if(path.indexOf("file:")==0)
+			{
+				try
+				{
+					var file:File = new File();
+					file.url = path;
+					path = file.nativePath;
+				}
+				catch(e:Error)
+				{
+				}
+			}
+			path = path.split("\\").join("/");
+			return path;
 		}
 		/**
 		 * 转换url中的反斜杠为斜杠
