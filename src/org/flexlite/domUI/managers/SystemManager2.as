@@ -32,10 +32,6 @@ package org.flexlite.domUI.managers
 		{
 			super();
 			mouseEnabledWhereTransparent = false;
-			if(stage)
-			{
-				onAddToStage();
-			}
 			this.addEventListener(Event.ADDED_TO_STAGE,onAddToStage);
 			this.addEventListener(Event.REMOVED_FROM_STAGE,onRemoved);
 		}
@@ -71,6 +67,7 @@ package org.flexlite.domUI.managers
 			stage.addEventListener(Event.ACTIVATE, activateHandler);
 			addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
 			stage.addEventListener(FocusEvent.FOCUS_IN, focusInHandler, true);
+			initialize();
 		}
 		/**
 		 * @inheritDoc
