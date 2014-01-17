@@ -32,8 +32,8 @@ package org.flexlite.domUI.managers
 		{
 			super();
 			mouseEnabledWhereTransparent = false;
-			this.addEventListener(Event.ADDED_TO_STAGE,onAddToStage);
-			this.addEventListener(Event.REMOVED_FROM_STAGE,onRemoved);
+			addEventListener(Event.ADDED_TO_STAGE,onAddToStage);
+			addEventListener(Event.REMOVED_FROM_STAGE,onRemoved);
 		}
 		/**
 		 * 从舞台移除
@@ -54,7 +54,7 @@ package org.flexlite.domUI.managers
 		/**
 		 * 添加到舞台
 		 */		
-		private function onAddToStage(event:Event=null):void
+		private function onAddToStage(event:Event):void
 		{
 			stage.stageFocusRect=false;
 			var index:int = DomGlobals._systemManagers.indexOf(this);
@@ -67,7 +67,6 @@ package org.flexlite.domUI.managers
 			stage.addEventListener(Event.ACTIVATE, activateHandler);
 			addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
 			stage.addEventListener(FocusEvent.FOCUS_IN, focusInHandler, true);
-			initialize();
 		}
 		/**
 		 * @inheritDoc
