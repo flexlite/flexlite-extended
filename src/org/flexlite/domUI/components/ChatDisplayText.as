@@ -1,6 +1,7 @@
 package org.flexlite.domUI.components
 {
 	import flash.display.DisplayObject;
+	import flash.geom.Rectangle;
 	import flash.text.engine.ContentElement;
 	import flash.text.engine.ElementFormat;
 	import flash.text.engine.GraphicElement;
@@ -95,6 +96,8 @@ package org.flexlite.domUI.components
 		 * TextLine对象列表
 		 */		
 		private var textLines:Vector.<TextLine> = new Vector.<TextLine>();
+		
+		private var textLinesIsDirty:Boolean = false;
 
 		override protected function commitProperties():void
 		{
@@ -102,6 +105,7 @@ package org.flexlite.domUI.components
 			if(textChanged)
 			{
 				contentElement = parseText(_text);
+				textLinesIsDirty = true;
 				textChanged = false;
 			}
 		}
@@ -178,6 +182,14 @@ package org.flexlite.domUI.components
 					text += line;
 				}
 			}
+			if(text)
+			{
+				text = text.split("[[").join("[");
+				text = text.split("]]").join("]");
+				textElement = new TextElement(text,new ElementFormat());
+				list.push(textElement);
+				text = "";
+			}
 			if(list.length==1)
 				return list[0];
 			if(list.length>1)
@@ -240,7 +252,13 @@ package org.flexlite.domUI.components
 		 */	
 		private function measureUsingWidth(w:Number):void
 		{
-			
+			if(isNaN(w))
+			{
+				w = 1000000;
+			}
+			var rect:Rectangle = createTextLines(w);
+			this.measuredHeight = rect.height;
+			this.measuredWidth = rect.width;
 		}
 		
 		
@@ -268,18 +286,26 @@ package org.flexlite.domUI.components
 			//接下来直接调用自身的updateDisplayList()而没有经过measure(),使用的测量尺寸是上一次的错误值。
 			if(invalidateSizeFlag)
 				validateSize();
-			
+			createTextLines(unscaledWidth);
 		}
 		
+		private var lastMaxLineWidth:Number = 0;
+		private var lastMeasuredSize:Rectangle = new Rectangle;
 		/**
-		 * 创建指定文本格式的TextLine对象列表，并返回测量的高度。
+		 * 创建指定文本格式的TextLine对象列表，并返回测量的尺寸。
 		 */		
-		private function createTextLines(maxLineWidth:Number):Number
+		private function createTextLines(maxLineWidth:Number):Rectangle
 		{
+			if(!textLinesIsDirty&&lastMaxLineWidth==maxLineWidth)
+			{
+				return lastMeasuredSize;
+			}
+			textLinesIsDirty = false;
 			releaseTextLines();
 			var textBlock:TextBlock = staticTextBlock;
 			textBlock.content = contentElement;
 			
+			var measuredRect:Rectangle = new Rectangle();
 			var n:int = 0;
 			var nextTextLine:TextLine;
 			var nextY:Number = 0;
@@ -302,16 +328,22 @@ package org.flexlite.domUI.components
 					break;
 				}
 				textLine = nextTextLine;
+				measuredRect.width = Math.max(measuredRect.width,textLine.textWidth);
+				if(n==0)
+					nextY = nextTextLine.ascent;
 				textLines[n++] = textLine;
 				textLine.y = nextY;
-				nextY += nextTextLine.height;
+				nextY += nextTextLine.textHeight;
 				addChild(textLine);
 			}
 			
-			if(textLines.length==0)
-				return 0;
-			textLine = textLines[textLines.length-1];
-			return textLine.y+textLine.height;
+			if(textLines.length>0)
+			{
+				textLine = textLines[textLines.length-1];
+				measuredRect.height = textLine.y+textLine.textHeight;
+			}
+			lastMeasuredSize = measuredRect;
+			return measuredRect;
 		}
 		
 		/**
