@@ -328,9 +328,9 @@ package org.flexlite.domUI.components
 					break;
 				}
 				textLine = nextTextLine;
-				measuredRect.width = Math.max(measuredRect.width,textLine.textWidth);
+				measuredRect.width = Math.max(measuredRect.width,textLine.width);
 				if(n==0)
-					nextY = nextTextLine.ascent;
+					nextY = nextTextLine.totalAscent;
 				textLines[n++] = textLine;
 				textLine.y = nextY;
 				nextY += nextTextLine.textHeight;
@@ -340,8 +340,9 @@ package org.flexlite.domUI.components
 			if(textLines.length>0)
 			{
 				textLine = textLines[textLines.length-1];
-				measuredRect.height = textLine.y+textLine.textHeight;
+				measuredRect.height = textLine.y+textLine.height;
 			}
+			measuredRect.width = Math.ceil(measuredRect.width);
 			lastMeasuredSize = measuredRect;
 			return measuredRect;
 		}
