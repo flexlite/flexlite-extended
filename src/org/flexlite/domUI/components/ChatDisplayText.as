@@ -19,7 +19,7 @@ package org.flexlite.domUI.components
 	use namespace dx_internal;
 	
 	/**
-	 * 
+	 * 聊天图文混排文本
 	 * @author DOM
 	 */
 	public class ChatDisplayText extends UIComponent
@@ -72,7 +72,7 @@ package org.flexlite.domUI.components
 		/**
 		 * 要显示的文本。文本中的表情用一对"[]"符表示，例如"[wx]",中括号内的"wx"对应一个唯一的表情显示对象。
 		 * 显示时将会截取中括号内的"wx"，传值给emoticonFunction函数以获得对应的显示对象,并替换掉"[wx]"。
-		 * 注意：若要表示单独的"["或"]"，请使用"[["或"]]"避免被转义。
+		 * 注意：若要表示单独的"["，请使用"[["代替，避免被转义,而"]"符不需要特殊写法。
 		 */
 		public function get text():String
 		{
@@ -130,7 +130,7 @@ package org.flexlite.domUI.components
 					var preStr:String = text.substring(0,index);
 					
 					text = text.substring(index+1);
-					if(text.charAt(0)==quote)
+					if(quote=="["&&text.charAt(0)==quote)
 					{
 						lines.push(preStr+quote);
 						text = text.substring(1);
@@ -168,8 +168,6 @@ package org.flexlite.domUI.components
 					var dp:DisplayObject = line as DisplayObject;
 					if(text)
 					{
-						text = text.split("[[").join("[");
-						text = text.split("]]").join("]");
 						var textElement:TextElement = new TextElement(text,new ElementFormat());
 						list.push(textElement);
 						text = "";
@@ -184,8 +182,6 @@ package org.flexlite.domUI.components
 			}
 			if(text)
 			{
-				text = text.split("[[").join("[");
-				text = text.split("]]").join("]");
 				textElement = new TextElement(text,new ElementFormat());
 				list.push(textElement);
 				text = "";
@@ -310,6 +306,7 @@ package org.flexlite.domUI.components
 			var nextTextLine:TextLine;
 			var nextY:Number = 0;
 			var textLine:TextLine;
+			var firstAscent:Number = 0;
 			
 			while (true)
 			{
@@ -330,7 +327,10 @@ package org.flexlite.domUI.components
 				textLine = nextTextLine;
 				measuredRect.width = Math.max(measuredRect.width,textLine.width);
 				if(n==0)
+				{
 					nextY = nextTextLine.totalAscent;
+					firstAscent = nextTextLine.ascent;
+				}
 				textLines[n++] = textLine;
 				textLine.y = nextY;
 				nextY += nextTextLine.textHeight;
@@ -340,7 +340,7 @@ package org.flexlite.domUI.components
 			if(textLines.length>0)
 			{
 				textLine = textLines[textLines.length-1];
-				measuredRect.height = textLine.y+textLine.height;
+				measuredRect.height = Math.ceil(textLine.y+textLine.height-firstAscent);
 			}
 			measuredRect.width = Math.ceil(measuredRect.width);
 			lastMeasuredSize = measuredRect;
