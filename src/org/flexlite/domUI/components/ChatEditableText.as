@@ -1,8 +1,10 @@
 package org.flexlite.domUI.components
 {
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.events.TextEvent;
+	import flash.text.engine.TextLine;
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
 	
@@ -108,6 +110,7 @@ package org.flexlite.domUI.components
 				addEventListener(TextEvent.TEXT_INPUT,onTextInput);
 				addEventListener(MouseEvent.ROLL_OVER,onMouseRollOver);
 				addEventListener(MouseEvent.ROLL_OUT,onMouseRollOut);
+				addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
 			}
 			else
 			{
@@ -115,15 +118,35 @@ package org.flexlite.domUI.components
 				removeEventListener(TextEvent.TEXT_INPUT,onTextInput);
 				removeEventListener(MouseEvent.ROLL_OVER,onMouseRollOver);
 				removeEventListener(MouseEvent.ROLL_OUT,onMouseRollOut);
+				removeEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
 			}
 		}
 		
-		protected function onMouseRollOut(event:MouseEvent):void
+		private function onMouseDown(event:MouseEvent):void
+		{
+			var textLine:TextLine;
+			var target:DisplayObject = event.target as DisplayObject;
+			while(target&&target!=this)
+			{
+				if(target is TextLine)
+				{
+					textLine = target as TextLine;
+					break;
+				}
+				target = target.parent;
+			}
+			if(!textLine)
+				return;
+			var index:int = textLine.getAtomIndexAtPoint(event.stageX,event.stageY);
+			trace(index);
+		}
+		
+		private function onMouseRollOut(event:MouseEvent):void
 		{
 			Mouse.cursor = MouseCursor.AUTO;
 		}
 		
-		protected function onMouseRollOver(event:MouseEvent):void
+		private function onMouseRollOver(event:MouseEvent):void
 		{
 			Mouse.cursor = MouseCursor.IBEAM;
 		}
