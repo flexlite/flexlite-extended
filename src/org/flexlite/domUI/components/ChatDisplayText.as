@@ -27,6 +27,7 @@ package org.flexlite.domUI.components
 		public function ChatDisplayText()
 		{
 			super();
+			mouseChildren = false;
 			addEventListener(UIEvent.UPDATE_COMPLETE,updateCompleteHandler);
 		}
 		
@@ -95,7 +96,7 @@ package org.flexlite.domUI.components
 		/**
 		 * TextLine对象列表
 		 */		
-		private var textLines:Vector.<TextLine> = new Vector.<TextLine>();
+		dx_internal var textLines:Vector.<TextLine> = new Vector.<TextLine>();
 		
 		private var textLinesIsDirty:Boolean = false;
 
@@ -306,7 +307,6 @@ package org.flexlite.domUI.components
 			var nextTextLine:TextLine;
 			var nextY:Number = 0;
 			var textLine:TextLine;
-			var firstAscent:Number = 0;
 			
 			while (true)
 			{
@@ -326,21 +326,17 @@ package org.flexlite.domUI.components
 				}
 				textLine = nextTextLine;
 				measuredRect.width = Math.max(measuredRect.width,textLine.width);
-				if(n==0)
-				{
-					nextY = nextTextLine.totalAscent;
-					firstAscent = nextTextLine.ascent;
-				}
+				nextY += nextTextLine.totalAscent;
 				textLines[n++] = textLine;
 				textLine.y = nextY;
-				nextY += nextTextLine.textHeight;
+				nextY += nextTextLine.totalDescent;
 				addChild(textLine);
 			}
 			
 			if(textLines.length>0)
 			{
 				textLine = textLines[textLines.length-1];
-				measuredRect.height = Math.ceil(textLine.y+textLine.height-firstAscent);
+				measuredRect.height = Math.ceil(textLine.y+textLine.totalDescent);
 			}
 			measuredRect.width = Math.ceil(measuredRect.width);
 			lastMeasuredSize = measuredRect;

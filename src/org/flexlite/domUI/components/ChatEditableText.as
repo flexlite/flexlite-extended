@@ -8,6 +8,10 @@ package org.flexlite.domUI.components
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
 	
+	import org.flexlite.domCore.dx_internal;
+	
+	use namespace dx_internal;
+	
 	/**
 	 * 可编辑的聊天图文混排文本
 	 * @author DOM
@@ -124,21 +128,26 @@ package org.flexlite.domUI.components
 		
 		private function onMouseDown(event:MouseEvent):void
 		{
-			var textLine:TextLine;
-			var target:DisplayObject = event.target as DisplayObject;
-			while(target&&target!=this)
+			var found:Boolean = false;
+			for each(var textLine:TextLine in textLines)
 			{
-				if(target is TextLine)
+				if(textLine.hitTestPoint(event.stageX,event.stageY))
 				{
-					textLine = target as TextLine;
+					found = true;
 					break;
 				}
-				target = target.parent;
 			}
 			if(!textLine)
 				return;
 			var index:int = textLine.getAtomIndexAtPoint(event.stageX,event.stageY);
-			trace(index);
+			while(textLine.previousLine)
+			{
+				textLine = textLine.previousLine;
+				index += textLine.atomCount;
+			}
+			_caretIndex = index;
+			if(stage)
+				stage.focus = this;
 		}
 		
 		private function onMouseRollOut(event:MouseEvent):void
@@ -198,18 +207,24 @@ package org.flexlite.domUI.components
 						var len:int = 1;
 						if(quote=="[")
 						{
-							len = preStr.length;
+							realLength += preStr.length;
+							if(realLength>showIndex)
+							{
+								return subLength-(realLength-showIndex);
+							}
 							quote = "]";
+							
 						}
-						realLength += len;
-						if(realLength>showIndex)
+						else
 						{
-							return subLength-(realLength-showIndex);
+							realLength += 1;
+							if(realLength>showIndex)
+							{
+								return subLength-index-1-(realLength-showIndex);
+							}
 						}
-						
 					}
 				}
-				
 			}
 			subLength += text.length;
 			realLength += text.length;
