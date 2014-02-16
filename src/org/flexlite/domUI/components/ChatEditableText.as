@@ -4,12 +4,14 @@ package org.flexlite.domUI.components
 	import flash.display.Graphics;
 	import flash.display.Shape;
 	import flash.events.FocusEvent;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TextEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.text.engine.TextLine;
+	import flash.ui.Keyboard;
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
 	import flash.utils.Timer;
@@ -28,12 +30,45 @@ package org.flexlite.domUI.components
 		{
 			super();
 			updateEditableState();
-			caretMask = new Shape();
+			drawCaretMask();
+		}
+		
+		private function drawCaretMask():void
+		{
+			if(!caretMask)
+				caretMask = new Shape();
 			var g:Graphics = caretMask.graphics;
 			g.clear();
-			g.lineStyle(1);
-			g.lineTo(0,12);
+			g.lineStyle(1,textColor);
+			g.lineTo(0,size);
 			g.endFill();
+		}
+		
+		/**
+		 * 插入一个表情符
+		 * @param key 表情符对应的字符串,字符串内不能含有"["和"]"两个特殊字符，
+		 * 此字符串由emoticonFunction()方法解析为显示对象。
+		 */		
+		public function insertEmoticon(key:String):void
+		{
+			var oldText:String = text;
+			var newText:String = "["+key+"]";
+			var insertIndex:int = getInsertIndex(_caretIndex);
+			var preStr:String = oldText.substring(0,insertIndex);
+			var subStr:String = oldText.substring(insertIndex);
+			text = preStr+newText+subStr;
+			_caretIndex += 1;
+		}
+		
+		private var sizeChanged:Boolean = false;
+		
+		override public function set size(value:int):void
+		{
+			if(super.size==value)
+				return;
+			super.size = value;
+			sizeChanged = true;
+			invalidateProperties();
 		}
 		
 		private var pendingEditable:Boolean = true;
@@ -111,6 +146,11 @@ package org.flexlite.domUI.components
 				updateEditableState();
 				editableChanged = false;
 			}
+			if(sizeChanged)
+			{
+				drawCaretMask();
+				sizeChanged = false;
+			}
 		}
 		
 		private var oldEditable:Boolean = false;
@@ -129,6 +169,7 @@ package org.flexlite.domUI.components
 				addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
 				addEventListener(FocusEvent.FOCUS_IN,onFocusIn);
 				addEventListener(FocusEvent.FOCUS_OUT,onFocusOut);
+				addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 			}
 			else
 			{
@@ -140,6 +181,44 @@ package org.flexlite.domUI.components
 				removeEventListener(FocusEvent.FOCUS_IN,onFocusIn);
 				removeEventListener(FocusEvent.FOCUS_OUT,onFocusOut);
 			}
+		}
+		
+		private function onKeyDown(event:KeyboardEvent):void
+		{
+			if(event.keyCode==Keyboard.BACKSPACE)
+			{
+				var insertIndex:int = getInsertIndex(_caretIndex-1);
+				removeIndex(insertIndex);
+				if(_caretIndex>0)
+					_caretIndex --;
+			}
+			else if(event.keyCode==Keyboard.DELETE)
+			{
+				insertIndex = getInsertIndex(_caretIndex);
+				removeIndex(insertIndex);
+			}
+		}
+		
+		private function removeIndex(index:int):void
+		{
+			var oldText:String = text;
+			var startIndex:int = index;
+			var endIndex:int = index+1;
+			if(oldText.charAt(index)=="[")
+			{
+				if(oldText.charAt(index+1)=="[")
+				{
+					endIndex ++;
+				}
+				else
+				{
+					var str:String = oldText.substr(startIndex+1);
+					endIndex = str.indexOf("]")+startIndex+2;
+				}
+			}
+			var preStr:String = oldText.substring(0,startIndex);
+			var subStr:String = oldText.substring(endIndex);
+			text = preStr+subStr;
 		}
 		
 		private var caretMask:Shape;
@@ -227,23 +306,32 @@ package org.flexlite.domUI.components
 			for each(var textLine:TextLine in textLines)
 			{
 				var startY:Number = textLine.y-textLine.totalAscent;
-				var endY:Number = textLine.y+textLine.totalDescent;
-				if(event.localY>=startY&&event.localY<=endY)
+				var endY:Number = textLine.y+textLine.totalDescent+leading;
+				if(event.localY>=startY&&event.localY<endY)
 				{
 					break;
 				}
 			}
 			var index:int = textLine.getAtomIndexAtPoint(event.stageX,event.stageY);
+			var offset:int = 1;
 			if(index==-1)
 			{
 				index = textLine.atomCount-1;
+			}
+			else
+			{
+				var rect:Rectangle = textLine.getAtomBounds(index);
+				if(rect.x+rect.width*0.5>event.localX)
+				{
+					offset = 0;
+				}
 			}
 			while(textLine.previousLine)
 			{
 				textLine = textLine.previousLine;
 				index += textLine.atomCount;
 			}
-			_caretIndex = index+1;
+			_caretIndex = index+offset;
 			if(stage)
 				stage.focus = this;
 			updateCaretMask();
@@ -267,7 +355,7 @@ package org.flexlite.domUI.components
 			var insertIndex:int = getInsertIndex(_caretIndex);
 			var preStr:String = oldText.substring(0,insertIndex);
 			var subStr:String = oldText.substring(insertIndex);
-			text = preStr+event.text+subStr;
+			text = preStr+newText+subStr;
 			_caretIndex += event.text.length;
 		}
 		/**

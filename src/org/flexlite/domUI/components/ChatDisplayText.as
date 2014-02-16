@@ -2,10 +2,14 @@ package org.flexlite.domUI.components
 {
 	import flash.display.DisplayObject;
 	import flash.geom.Rectangle;
+	import flash.text.Font;
 	import flash.text.engine.ContentElement;
 	import flash.text.engine.ElementFormat;
+	import flash.text.engine.FontDescription;
+	import flash.text.engine.FontLookup;
 	import flash.text.engine.GraphicElement;
 	import flash.text.engine.GroupElement;
+	import flash.text.engine.Kerning;
 	import flash.text.engine.TextBlock;
 	import flash.text.engine.TextElement;
 	import flash.text.engine.TextLine;
@@ -91,6 +95,203 @@ package org.flexlite.domUI.components
 			invalidateDisplayList();
 		}
 		
+		
+		private var _textAlign:String = "left";
+		/**
+		 * 文字的水平对齐方式 ,请使用TextFormatAlign中定义的常量。
+		 * 默认值：TextFormatAlign.LEFT。
+		 */		
+		public function get textAlign():String
+		{
+			return _textAlign;
+		}
+		
+		public function set textAlign(value:String):void
+		{
+			if(_textAlign==value)
+				return;
+			_textAlign = value;
+			invalidateFormat();
+		}
+		
+		private var _size:int = 12;
+		/**
+		 * 字号大小，默认值：12。
+		 */		
+		public function get size():int
+		{
+			return _size;
+		}
+		public function set size(value:int):void
+		{
+			if(_size==value)
+				return;
+			_size = value;
+			invalidateFormat();
+		}
+		
+		private var _textColor:uint=0x000000;
+		/**
+		 * @inheritDoc
+		 */
+		public function get textColor():uint
+		{
+			return _textColor;
+		}
+		
+		public function set textColor(value:uint):void
+		{
+			if(_textColor==value)
+				return;
+			_textColor = value;
+			invalidateFormat();
+		}
+		/**
+		 * 是否使用嵌入字体
+		 */		
+		private var fontLookup:String = FontLookup.DEVICE;
+		
+		private var _fontFamily:String="SimSun";
+		/**
+		 * 字体名称。默认值：SimSun
+		 */	
+		public function get fontFamily():String
+		{
+			return _fontFamily;
+		}
+		public function set fontFamily(value:String):void
+		{
+			if(_fontFamily==value)
+				return;
+			_fontFamily = value;
+			var fontList:Array = Font.enumerateFonts(false);
+			fontLookup = FontLookup.DEVICE;
+			for each(var font:Font in fontList)
+			{
+				if(font.fontName==value)
+				{
+					fontLookup = FontLookup.EMBEDDED_CFF;
+					break;
+				}
+			}
+			invalidateFormat();
+		}
+		
+		private var _italic:Boolean = false;
+		
+		/**
+		 * 是否为斜体,默认false。
+		 */
+		public function get italic():Boolean
+		{
+			return _italic;
+		}
+		
+		public function set italic(value:Boolean):void
+		{
+			if(_italic==value)
+				return;
+			_italic = value;
+			invalidateFormat();
+		}
+		
+		private var _bold:Boolean = false;
+		
+		/**
+		 * 是否为粗体,默认false。
+		 */
+		public function get bold():Boolean
+		{
+			return _bold;
+		}
+		public function set bold(value:Boolean):void
+		{
+			if(_bold==value)
+				return;
+			_bold = value;
+			invalidateFormat();
+		}
+		
+		private var _leading:int = 2;
+		/**
+		 * 行距,默认值为2。
+		 */
+		public function get leading():int
+		{
+			return _leading;
+		}
+		
+		public function set leading(value:int):void
+		{
+			if(_leading==value)
+				return;
+			_leading = value;
+			invalidateFormat();
+		}
+		
+		private var _letterSpacing:Number = 0;
+		/**
+		 * 字符间距,默认值为0。
+		 */
+		public function get letterSpacing():Number
+		{
+			return _letterSpacing;
+		}
+		public function set letterSpacing(value:Number):void
+		{
+			if(_letterSpacing==value)
+				return;
+			_letterSpacing = value;
+			invalidateFormat();
+		}
+		
+		/**
+		 * 文本格式对象
+		 */		
+		private var elementFormat:ElementFormat;
+		/**
+		 * 标记文本格式发生改变
+		 */		
+		private function invalidateFormat():void
+		{
+			elementFormat = null;
+			invalidateSize();
+			invalidateDisplayList();
+		}
+		
+		/**
+		 * 创建文本格式对象
+		 */		
+		private function createElementFormat():ElementFormat
+		{
+			var fontStyle:String = _italic?"italic":"normal";
+			var fontWeight:String = _bold?"bold":"normal";
+			var fontDescription:FontDescription = new FontDescription(_fontFamily,fontWeight,fontStyle,fontLookup);
+			var elementFormat:ElementFormat = new ElementFormat();
+			elementFormat.fontSize = size;
+			elementFormat.color = _textColor;
+			elementFormat.kerning = Kerning.AUTO;
+			elementFormat.fontDescription = fontDescription;
+			
+			var tracking:Number = isNaN(_letterSpacing)?0:_letterSpacing;
+			if(_textAlign=="left")
+			{
+				elementFormat.trackingRight = tracking;
+			}
+			else if(_textAlign=="right")
+			{
+				elementFormat.trackingLeft = tracking;
+			}
+			else
+			{
+				elementFormat.trackingLeft = tracking*0.5;
+				elementFormat.trackingRight = tracking*0.5;
+			}
+			
+			return elementFormat;
+		}
+		
+		
 		private var contentElement:ContentElement;
 		
 		/**
@@ -103,6 +304,11 @@ package org.flexlite.domUI.components
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
+			if(!elementFormat)
+			{
+				elementFormat = createElementFormat();
+				textChanged = true;
+			}
 			if(textChanged)
 			{
 				contentElement = parseText(_text);
@@ -110,6 +316,7 @@ package org.flexlite.domUI.components
 				textChanged = false;
 			}
 		}
+		
 		
 		/**
 		 * 解析文本
@@ -169,11 +376,11 @@ package org.flexlite.domUI.components
 					var dp:DisplayObject = line as DisplayObject;
 					if(text)
 					{
-						var textElement:TextElement = new TextElement(text,new ElementFormat());
+						var textElement:TextElement = new TextElement(text,elementFormat);
 						list.push(textElement);
 						text = "";
 					}
-					var graphicElement:GraphicElement = new GraphicElement(dp,dp.width,dp.height,new ElementFormat);
+					var graphicElement:GraphicElement = new GraphicElement(dp,dp.width,dp.height,elementFormat);
 					list.push(graphicElement);
 				}
 				else
@@ -183,7 +390,7 @@ package org.flexlite.domUI.components
 			}
 			if(text)
 			{
-				textElement = new TextElement(text,new ElementFormat());
+				textElement = new TextElement(text,elementFormat);
 				list.push(textElement);
 				text = "";
 			}
@@ -191,7 +398,7 @@ package org.flexlite.domUI.components
 				return list[0];
 			if(list.length>1)
 			{
-				var groupElement:GroupElement = new GroupElement(list,new ElementFormat());
+				var groupElement:GroupElement = new GroupElement(list,elementFormat);
 				return groupElement;
 			}
 			return null;
@@ -301,8 +508,9 @@ package org.flexlite.domUI.components
 			releaseTextLines();
 			var textBlock:TextBlock = staticTextBlock;
 			textBlock.content = contentElement;
-			
 			var measuredRect:Rectangle = new Rectangle();
+			if(!contentElement)
+				return measuredRect;
 			var n:int = 0;
 			var nextTextLine:TextLine;
 			var nextY:Number = 0;
@@ -329,7 +537,7 @@ package org.flexlite.domUI.components
 				nextY += nextTextLine.totalAscent;
 				textLines[n++] = textLine;
 				textLine.y = nextY;
-				nextY += nextTextLine.totalDescent;
+				nextY += nextTextLine.totalDescent+_leading;
 				addChildAt(textLine,0);
 			}
 			
