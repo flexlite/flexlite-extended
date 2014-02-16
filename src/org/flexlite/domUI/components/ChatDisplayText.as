@@ -291,7 +291,7 @@ package org.flexlite.domUI.components
 		/**
 		 * 创建指定文本格式的TextLine对象列表，并返回测量的尺寸。
 		 */		
-		private function createTextLines(maxLineWidth:Number):Rectangle
+		protected function createTextLines(maxLineWidth:Number):Rectangle
 		{
 			if(!textLinesIsDirty&&lastMaxLineWidth==maxLineWidth)
 			{
@@ -330,7 +330,7 @@ package org.flexlite.domUI.components
 				textLines[n++] = textLine;
 				textLine.y = nextY;
 				nextY += nextTextLine.totalDescent;
-				addChild(textLine);
+				addChildAt(textLine,0);
 			}
 			
 			if(textLines.length>0)

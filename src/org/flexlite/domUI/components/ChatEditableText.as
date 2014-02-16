@@ -2,11 +2,17 @@ package org.flexlite.domUI.components
 {
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
+	import flash.display.Shape;
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TextEvent;
+	import flash.events.TimerEvent;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.text.engine.TextLine;
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
+	import flash.utils.Timer;
 	
 	import org.flexlite.domCore.dx_internal;
 	
@@ -22,6 +28,12 @@ package org.flexlite.domUI.components
 		{
 			super();
 			updateEditableState();
+			caretMask = new Shape();
+			var g:Graphics = caretMask.graphics;
+			g.clear();
+			g.lineStyle(1);
+			g.lineTo(0,12);
+			g.endFill();
 		}
 		
 		private var pendingEditable:Boolean = true;
@@ -90,7 +102,7 @@ package org.flexlite.domUI.components
 		{
 			return _caretIndex;
 		}
-
+		
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
@@ -115,6 +127,8 @@ package org.flexlite.domUI.components
 				addEventListener(MouseEvent.ROLL_OVER,onMouseRollOver);
 				addEventListener(MouseEvent.ROLL_OUT,onMouseRollOut);
 				addEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
+				addEventListener(FocusEvent.FOCUS_IN,onFocusIn);
+				addEventListener(FocusEvent.FOCUS_OUT,onFocusOut);
 			}
 			else
 			{
@@ -123,31 +137,116 @@ package org.flexlite.domUI.components
 				removeEventListener(MouseEvent.ROLL_OVER,onMouseRollOver);
 				removeEventListener(MouseEvent.ROLL_OUT,onMouseRollOut);
 				removeEventListener(MouseEvent.MOUSE_DOWN,onMouseDown);
+				removeEventListener(FocusEvent.FOCUS_IN,onFocusIn);
+				removeEventListener(FocusEvent.FOCUS_OUT,onFocusOut);
 			}
+		}
+		
+		private var caretMask:Shape;
+		
+		private var timer:Timer;
+		
+		private function onFocusIn(event:FocusEvent):void
+		{
+			addChild(caretMask);
+			updateCaretMask();
+			if(!timer)
+			{
+				timer = new Timer(500);
+				timer.addEventListener(TimerEvent.TIMER,onCaretTick);
+			}
+			timer.start();
+		}
+		
+		private function onFocusOut(event:FocusEvent):void
+		{
+			removeChild(caretMask);
+			timer.stop();
+		}
+		
+		private function onCaretTick(event:TimerEvent):void
+		{
+			caretMask.visible = !caretMask.visible;
+		}
+		
+		
+		/**
+		 * 更新当前
+		 */		
+		private function updateCaretMask():void
+		{
+			var textLine:TextLine = textLines.length>0?textLines[0]:null;
+			if(textLine)
+			{
+				var count:int = 0;
+				var found:Boolean = false;
+				var rect:Rectangle;
+				while(textLine)
+				{
+					if(count+textLine.atomCount>=_caretIndex+1)
+					{
+						found = true;
+						break;
+					}
+					count += textLine.atomCount;
+					textLine = textLine.nextLine;
+				}
+				if(found)
+				{
+					rect = textLine.getAtomBounds(_caretIndex-count);
+					caretMask.x = rect.x;
+					caretMask.y = textLine.y - textLine.ascent;
+				}
+				else
+				{
+					textLine = textLines[textLines.length-1];
+					rect = textLine.getAtomBounds(textLine.atomCount-1);
+					caretMask.x = rect.x+rect.width;
+					caretMask.y = textLine.y - textLine.ascent;
+				}
+				
+			}
+			else
+			{
+				caretMask.x = 0;
+				caretMask.y = 0;
+			}
+			caretMask.visible = true;
 		}
 		
 		private function onMouseDown(event:MouseEvent):void
 		{
-			var found:Boolean = false;
+			if(textLines.length==0)
+			{
+				_caretIndex = 0;
+				if(stage)
+					stage.focus = this;
+				updateCaretMask();
+				return;
+			}
 			for each(var textLine:TextLine in textLines)
 			{
-				if(textLine.hitTestPoint(event.stageX,event.stageY))
+				var startY:Number = textLine.y-textLine.totalAscent;
+				var endY:Number = textLine.y+textLine.totalDescent;
+				if(event.localY>=startY&&event.localY<=endY)
 				{
-					found = true;
 					break;
 				}
 			}
-			if(!textLine)
-				return;
 			var index:int = textLine.getAtomIndexAtPoint(event.stageX,event.stageY);
+			if(index==-1)
+			{
+				index = textLine.atomCount-1;
+			}
 			while(textLine.previousLine)
 			{
 				textLine = textLine.previousLine;
 				index += textLine.atomCount;
 			}
-			_caretIndex = index;
+			_caretIndex = index+1;
 			if(stage)
 				stage.focus = this;
+			updateCaretMask();
 		}
 		
 		private function onMouseRollOut(event:MouseEvent):void
@@ -229,6 +328,13 @@ package org.flexlite.domUI.components
 			subLength += text.length;
 			realLength += text.length;
 			return subLength-Math.max(0,realLength-showIndex);
+		}
+		
+		override protected function createTextLines(maxLineWidth:Number):Rectangle
+		{
+			var rect:Rectangle = super.createTextLines(maxLineWidth);
+			updateCaretMask();
+			return rect;
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
