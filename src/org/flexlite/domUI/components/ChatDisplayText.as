@@ -356,6 +356,7 @@ package org.flexlite.domUI.components
 							{
 								lines.push("["+preStr+"]");
 							}
+							quote = "[";
 						}
 						else
 						{

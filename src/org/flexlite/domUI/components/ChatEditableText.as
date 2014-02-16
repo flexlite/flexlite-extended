@@ -382,7 +382,7 @@ package org.flexlite.domUI.components
 				{
 					var preStr:String = text.substring(0,index);
 					text = text.substring(index+1);
-					subLength += index+1;
+					subLength += index;
 					if(quote=="["&&text.charAt(0)==quote)
 					{
 						text = text.substring(1);
@@ -407,10 +407,12 @@ package org.flexlite.domUI.components
 							realLength += 1;
 							if(realLength>showIndex)
 							{
-								return subLength-index-1-(realLength-showIndex);
+								return subLength-index-(realLength-showIndex);
 							}
+							quote = "[";
 						}
 					}
+					subLength += 1;
 				}
 			}
 			subLength += text.length;
@@ -425,15 +427,6 @@ package org.flexlite.domUI.components
 			return rect;
 		}
 		
-		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
-		{
-			super.updateDisplayList(unscaledWidth,unscaledHeight);
-			var g:Graphics = this.graphics;
-			g.clear();
-			g.beginFill(0x009aff,1);
-			g.drawRect(0,0,unscaledWidth,unscaledHeight);
-			g.endFill();
-		}
 	}
 	
 }
