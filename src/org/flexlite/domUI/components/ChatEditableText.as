@@ -197,6 +197,23 @@ package org.flexlite.domUI.components
 				insertIndex = getInsertIndex(_caretIndex);
 				removeIndex(insertIndex);
 			}
+			else if(event.keyCode==Keyboard.LEFT)
+			{
+				if(_caretIndex>0)
+				{
+					_caretIndex--;
+					updateCaretMask();
+				}
+			}
+			else if(event.keyCode==Keyboard.RIGHT)
+			{
+				var oldIndex:int = getInsertIndex(_caretIndex);
+				if(getInsertIndex(_caretIndex+1)>oldIndex)
+				{
+					_caretIndex++;
+					updateCaretMask();
+				}
+			}
 		}
 		
 		private function removeIndex(index:int):void
