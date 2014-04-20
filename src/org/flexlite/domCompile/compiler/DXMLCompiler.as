@@ -630,10 +630,11 @@ package org.flexlite.domCompile.compiler
 		 */		
 		private function formatString(value:String):String
 		{
-			value = "\""+value+"\"";
+			value = StringUtil.unescapeHTMLEntity(value);
 			value = value.split("\n").join("\\n");
 			value = value.split("\r").join("\\n");
 			value = value.split("\"").join("\\\"");
+			value = "\""+value+"\"";
 			return value;
 		}
 		

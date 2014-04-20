@@ -130,5 +130,39 @@ package org.flexlite.domUtils
 			}
 			return sizeStr;
 		}
+		
+		private static var htmlEntities:Array = [["<","&lt;"],[">","&gt;"],["&","&amp;"],["\"","&quot;"],["'","&apos;"]];
+		/**
+		 * 转换为HTML实体字符
+		 */		
+		public static function escapeHTMLEntity(str:String):String
+		{
+			if(!str)
+				return "";
+			var list:Array = htmlEntities;
+			for each(var arr:Array in list)
+			{
+				var key:String = arr[0];
+				var value:String = arr[1];
+				str = str.split(key).join(value);
+			}
+			return str;
+		}
+		/**
+		 * 转换HTML实体字符为普通字符
+		 */		
+		public static function unescapeHTMLEntity(str:String):String
+		{
+			if(!str)
+				return "";
+			var list:Array = htmlEntities;
+			for each(var arr:Array in list)
+			{
+				var key:String = arr[0];
+				var value:String = arr[1];
+				str = str.split(value).join(key);
+			}
+			return str;
+		}
 	}
 }
