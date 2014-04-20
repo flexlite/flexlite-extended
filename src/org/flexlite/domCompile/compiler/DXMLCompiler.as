@@ -633,6 +633,7 @@ package org.flexlite.domCompile.compiler
 			value = "\""+value+"\"";
 			value = value.split("\n").join("\\n");
 			value = value.split("\r").join("\\n");
+			value = value.split("\"").join("\\\"");
 			return value;
 		}
 		
