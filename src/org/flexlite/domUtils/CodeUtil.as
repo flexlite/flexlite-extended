@@ -129,7 +129,7 @@ package org.flexlite.domUtils
 		/**
 		 * 获取第一个词,遇到空白字符或 \n \r \t 后停止。
 		 */
-		private function getFirstWord(str:String):String
+		public static function getFirstWord(str:String):String
 		{
 			str = StringUtil.trimLeft(str);
 			var index:int = str.indexOf(" ");
@@ -149,6 +149,22 @@ package org.flexlite.domUtils
 			return StringUtil.trim(str);
 		}
 		/**
+		 * 移除第一个词
+		 * @param str 要处理的字符串
+		 * @param word 要移除的词，若不传入则自动获取。
+		 */		
+		public static function removeFirstWord(str:String,word:String=""):String
+		{
+			if(!word)
+			{
+				word = getFirstWord(str);
+			}
+			var index:int = str.indexOf(word);
+			if(index==-1)
+				return str;
+			return str.substring(index+word.length);
+		}
+		/**
 		 * 获取最后一个词,遇到空白字符或 \n \r \t 后停止。
 		 */
 		public static function getLastWord(str:String):String
@@ -161,6 +177,22 @@ package org.flexlite.domUtils
 			index = Math.max(index,rIndex,nIndex,tIndex);
 			str = str.substring(index+1);
 			return StringUtil.trim(str);
+		}
+		/**
+		 * 移除最后一个词
+		 * @param str 要处理的字符串
+		 * @param word 要移除的词，若不传入则自动获取。
+		 */		
+		public static function removeLastWord(str:String,word:String=""):String
+		{
+			if(!word)
+			{
+				word = getLastWord(str);
+			}
+			var index:int = str.lastIndexOf(word);
+			if(index==-1)
+				return str;
+			return str.substring(0,index);
 		}
 		/**
 		 * 获取字符串起始的第一个变量，返回的字符串两端均没有空白。若第一个非空白字符就不是合法变量字符，则返回空字符串。
@@ -185,6 +217,22 @@ package org.flexlite.domUtils
 			return StringUtil.trim(word);
 		}
 		/**
+		 * 移除第一个变量
+		 * @param str 要处理的字符串
+		 * @param word 要移除的变量，若不传入则自动获取。
+		 */		
+		public static function removeFirstVariable(str:String,word:String=""):String
+		{
+			if(!word)
+			{
+				word = getFirstVariable(str);
+			}
+			var index:int = str.indexOf(word);
+			if(index==-1)
+				return str;
+			return str.substring(index+word.length);
+		}
+		/**
 		 * 获取字符串末尾的最后一个变量,返回的字符串两端均没有空白。若最后一个非空白字符就不是合法变量字符，则返回空字符串。
 		 */		
 		public static function getLastVariable(str:String):String
@@ -204,6 +252,22 @@ package org.flexlite.domUtils
 				}
 			}
 			return StringUtil.trim(word);
+		}
+		/**
+		 * 移除最后一个变量
+		 * @param str 要处理的字符串
+		 * @param word 要移除的变量，若不传入则自动获取。
+		 */		
+		public static function removeLastVariable(str:String,word:String=""):String
+		{
+			if(!word)
+			{
+				word = getLastVariable(str);
+			}
+			var index:int = str.lastIndexOf(word);
+			if(index==-1)
+				return str;
+			return str.substring(0,index);
 		}
 		/**
 		 * 获取一对括号的结束点,例如"class A{ function B(){} } class",返回24
@@ -239,7 +303,7 @@ package org.flexlite.domUtils
 			return text.length-1;
 		}
 		/**
-		 * 获取一对括号的起始点,例如"class A{ function B(){} } class",返回7
+		 * 从后往前搜索，获取一对括号的起始点,例如"class A{ function B(){} } class",返回7
 		 */		
 		public static function getBracketStartIndex(codeText:String,left:String="{",right:String="}"):int
 		{
