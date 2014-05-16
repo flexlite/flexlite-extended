@@ -7,6 +7,7 @@ package org.flexlite.domUtils.loader
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	import flash.utils.setTimeout;
 
 	/**
 	 * 对多个URLLoader类队列加载过程的封装
@@ -210,7 +211,9 @@ package org.flexlite.domUtils.loader
 		private function onAllComp():void
 		{
 			if(allCompFunc!=null)
-				allCompFunc(returnArray);
+			{
+				setTimeout(allCompFunc,1,returnArray);//延迟一下，防止loader占用文件，导致当前文件不可写入。
+			}
 		}
 	}
 }

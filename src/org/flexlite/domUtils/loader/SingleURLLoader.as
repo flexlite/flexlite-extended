@@ -7,6 +7,7 @@ package org.flexlite.domUtils.loader
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	import flash.utils.setTimeout;
 
 	/**
 	 * 对单个URLLoader类加载过程的封装
@@ -90,10 +91,10 @@ package org.flexlite.domUtils.loader
 				switch(format)
 				{
 					case FORMAT_BYTE_ARRAY:
-						compFunc(loader.data as ByteArray);
+						setTimeout(compFunc,1,loader.data as ByteArray);
 						break;
 					case FORMAT_TEXT:
-						compFunc(loader.data as String);
+						setTimeout(compFunc,1,loader.data as String);
 						break;
 					case FORMAT_XML:
 						var data:String = loader.data as String;
@@ -109,7 +110,7 @@ package org.flexlite.domUtils.loader
 								xml = null;
 							}
 						}
-						compFunc(xml);
+						setTimeout(compFunc,1,xml);
 						break;
 					default:;
 				}

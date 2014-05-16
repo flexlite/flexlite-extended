@@ -10,6 +10,7 @@ package org.flexlite.domUtils.loader
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
+	import flash.utils.setTimeout;
 
 	/**
 	 * 对单个Loader类加载过程的封装
@@ -179,12 +180,12 @@ package org.flexlite.domUtils.loader
 				switch(format)
 				{
 					case FORMAT_LOADER:
-						compFunc(loader);
+						setTimeout(compFunc,1,loader);
 						loader = null;
 						break;
 					case FORMAT_BITMAP:
 						var bm:Bitmap = loader.contentLoaderInfo.content as Bitmap;
-						compFunc(bm);
+						setTimeout(compFunc,1,bm);
 						loader.unload();
 						break;
 					case FORMAT_BITMAP_DATA:
@@ -194,7 +195,7 @@ package org.flexlite.domUtils.loader
 						{
 							bd = bm2.bitmapData;
 						}
-						compFunc(bd);
+						setTimeout(compFunc,1,bd);
 						loader.unload();
 						break;
 					case FORMAT_EXTERNAL_CLASS:
@@ -204,7 +205,7 @@ package org.flexlite.domUtils.loader
 						{
 							classData = appDomain.getDefinition(className) as Class;
 						}
-						compFunc(classData);
+						setTimeout(compFunc,1,classData);
 						loader.unload();
 						break;
 					case FORMAT_EXTERNAL_CLASSES:
@@ -226,7 +227,7 @@ package org.flexlite.domUtils.loader
 								classList.push(tmpClassData);
 							}
 						}
-						compFunc(classList, keyList);
+						setTimeout(compFunc,1,classList, keyList);
 						loader.unload();
 						break;
 					default:;
