@@ -70,6 +70,25 @@ package org.flexlite.domUtils
 			codeText = lines.join("\n");
 			return codeText;
 		}
+		/**
+		 * 判断一个字符串是否是常量，即全部大写的合法变量。
+		 */		
+		public static function isConstant(word:String):Boolean
+		{
+			if(!isVariableWord(word))
+				return false;
+			var found:Boolean = false;
+			for(var i:int=2;i<word.length;i++)
+			{
+				var char:String = word.charAt(i);
+				if(char>="a"&&char<="z")
+				{
+					found = true;
+					break;
+				}
+			}
+			return !found;
+		}
 		
 		/**
 		 * 判断一个字符串是否为合法变量名,第一个字符为字母,下划线或$开头，第二个字符开始为字母,下划线，数字或$
