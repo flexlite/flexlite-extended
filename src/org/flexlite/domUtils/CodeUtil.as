@@ -22,9 +22,20 @@ package org.flexlite.domUtils
 				while(count>0)
 				{
 					var char:String = line.charAt(0);
-					if(char=="\t"||char==" ")
+					if(char=="\t")
 					{
 						line = line.substring(1);
+					}
+					else if(char==" ")
+					{
+						var index:int = 4;
+						while(index>0)
+						{
+							if(line.charAt(0)==" ")
+								line = line.substring(1);
+							index--;
+						}
+						
 					}
 					count--;
 				}
