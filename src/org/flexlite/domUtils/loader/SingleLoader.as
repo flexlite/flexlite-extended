@@ -117,6 +117,7 @@ package org.flexlite.domUtils.loader
 			this.compFunc = compFunc;
 			this.progressFunc = progressFunc;
 			this.ioErrorFunc = ioErrorFunc;
+			url = PathHelper.path2Url(url);
 			if(appDomain)
 			{
 				var ldc:LoaderContext = new LoaderContext(false,appDomain);

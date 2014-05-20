@@ -42,6 +42,7 @@ package org.flexlite.domUtils.loader
 			loader.contentLoaderInfo.addEventListener(Event.COMPLETE,onComp);
 			loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS,onProgress);
 			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,ioError);
+			url = PathHelper.path2Url(url);
 			loader.load(new URLRequest(url));
 		}
 		

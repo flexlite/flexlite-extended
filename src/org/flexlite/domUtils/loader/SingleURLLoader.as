@@ -74,6 +74,7 @@ package org.flexlite.domUtils.loader
 			this.compFunc = onComp;
 			this.progressFunc = onProgress;
 			this.ioErrorFunc = onIoError;
+			url = PathHelper.path2Url(url);
 			loader.load(new URLRequest(url));
 		}
 		

@@ -131,6 +131,7 @@ package org.flexlite.domUtils.loader
 		private function loadItem():void
 		{
 			var path:String = urlArray[currentIndex];
+			path = PathHelper.path2Url(path);
 			loader.load(new URLRequest(path));
 		}
 		/**
