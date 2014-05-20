@@ -20,7 +20,6 @@ package org.flexlite.domUtils.loader
 		 */		
 		public static function path2Url(path:String):String
 		{
-			return path;
 			if(!checked)
 				checkEnvironment();
 			if(!needConvert||!path||path.charAt(0)!="/")
@@ -39,7 +38,12 @@ package org.flexlite.domUtils.loader
 			checked = true;
 			if(Capabilities.os.indexOf("Windows")!=-1)
 				return;
-			FileClass = getDefinitionByName("flash.filesystem.File") as Class;
+			try
+			{
+				FileClass = getDefinitionByName("flash.filesystem.File") as Class;
+			}
+			catch(e:Error)
+			{}
 			if(!FileClass)
 				return;
 			needConvert = true;
