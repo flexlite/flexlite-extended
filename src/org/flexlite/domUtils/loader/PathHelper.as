@@ -20,7 +20,6 @@ package org.flexlite.domUtils.loader
 		 */		
 		public static function path2Url(path:String):String
 		{
-			return path;
 			if(!checked)
 				checkEnvironment();
 			if(!needConvert||!path||path.charAt(0)!="/")
