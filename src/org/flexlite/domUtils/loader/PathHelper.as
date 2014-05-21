@@ -36,7 +36,8 @@ package org.flexlite.domUtils.loader
 		private static function checkEnvironment():void
 		{
 			checked = true;
-			if(Capabilities.os.indexOf("Windows")!=-1)
+			if(Capabilities.playerType!="Desktop"||
+				Capabilities.os.indexOf("Windows")!=-1)
 				return;
 			try
 			{
