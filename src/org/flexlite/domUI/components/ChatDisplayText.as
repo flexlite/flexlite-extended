@@ -539,7 +539,7 @@ package org.flexlite.domUI.components
 				textLines[n++] = textLine;
 				textLine.y = nextY;
 				nextY += nextTextLine.totalDescent+_leading;
-				addChildAt(textLine,0);
+				addToDisplayListAt(textLine,0);
 			}
 			
 			if(textLines.length>0)

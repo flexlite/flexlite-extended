@@ -19,11 +19,13 @@ package org.flexlite.domUI.components
 	import flash.text.engine.TextLine;
 	import flash.text.engine.TextLineValidity;
 	
+	import org.flexlite.domCore.dx_internal;
 	import org.flexlite.domUI.core.IDisplayText;
 	import org.flexlite.domUI.core.UIComponent;
 	import org.flexlite.domUI.events.UIEvent;
 	import org.flexlite.domUtils.Recycler;
 	
+	use namespace dx_internal;
 	
 	/**
 	 * 一行或多行不可编辑的文本控件,基于FTE。
@@ -40,7 +42,7 @@ package org.flexlite.domUI.components
 			mouseChildren = false;
 			addEventListener(UIEvent.UPDATE_COMPLETE, updateCompleteHandler);
 			backgroundShape = new Shape();
-			addChild(backgroundShape);
+			addToDisplayList(backgroundShape);
 		}
 		/**
 		 * 显示设置的宽度
@@ -644,7 +646,7 @@ package org.flexlite.domUI.components
 			{
 				var textLine:DisplayObject = textLines[i];		
 				
-				addChildAt(textLine, 1);
+				addToDisplayListAt(textLine, 1);
 			}
 		}
 		/**
@@ -661,7 +663,7 @@ package org.flexlite.domUI.components
 				var textLine:DisplayObject = textLines[i];	
 				var parent:UIComponent = textLine.parent as UIComponent;
 				if (parent)
-					UIComponent(textLine.parent).removeChild(textLine);
+					UIComponent(textLine.parent).removeFromDisplayList(textLine);
 			}
 		}
 		/**

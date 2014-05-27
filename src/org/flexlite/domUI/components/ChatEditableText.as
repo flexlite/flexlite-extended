@@ -244,7 +244,7 @@ package org.flexlite.domUI.components
 		
 		private function onFocusIn(event:FocusEvent):void
 		{
-			addChild(caretMask);
+			addToDisplayList(caretMask);
 			updateCaretMask();
 			if(!timer)
 			{
@@ -256,7 +256,7 @@ package org.flexlite.domUI.components
 		
 		private function onFocusOut(event:FocusEvent):void
 		{
-			removeChild(caretMask);
+			removeFromDisplayList(caretMask);
 			timer.stop();
 		}
 		
