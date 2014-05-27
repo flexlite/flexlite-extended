@@ -300,7 +300,7 @@ package org.flexlite.domUtils
 			return str.substring(0,index);
 		}
 		/**
-		 * 获取一对括号的结束点,例如"class A{ function B(){} } class",返回24
+		 * 获取一对括号的结束点,例如"class A{ function B(){} } class",返回24,若查找失败，返回-1。
 		 */		
 		public static function getBracketEndIndex(codeText:String,left:String="{",right:String="}"):int
 		{
@@ -315,7 +315,7 @@ package org.flexlite.domUtils
 				if(endIndex==-1)
 					endIndex = int.MAX_VALUE;
 				index = Math.min(index,endIndex);
-				if(index==-1)
+				if(index==int.MAX_VALUE)
 				{
 					return -1;
 				}
@@ -329,11 +329,13 @@ package org.flexlite.domUtils
 				{
 					break;
 				}
+				if(codeText.length==0)
+					return -1;
 			}
 			return text.length-1;
 		}
 		/**
-		 * 从后往前搜索，获取一对括号的起始点,例如"class A{ function B(){} } class",返回7
+		 * 从后往前搜索，获取一对括号的起始点,例如"class A{ function B(){} } class",返回7，若查找失败，返回-1。
 		 */		
 		public static function getBracketStartIndex(codeText:String,left:String="{",right:String="}"):int
 		{
@@ -356,6 +358,8 @@ package org.flexlite.domUtils
 				{
 					break;
 				}
+				if(codeText.length==0)
+					return -1;
 			}
 			return codeText.length;
 		}
