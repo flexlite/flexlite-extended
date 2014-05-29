@@ -15,7 +15,7 @@ package org.flexlite.domUtils
 		/**
 		 * 占位符
 		 */		
-		public static const NBSP:String = "\a3\a";
+		public static const NBSP:String = "\v3\v";
 		/**
 		 * 注释行
 		 */		
@@ -26,8 +26,8 @@ package org.flexlite.domUtils
 		public function removeComment(codeText:String):String
 		{
 			var trimText:String = "";
-			codeText = codeText.split("\\\"").join("\a1\a");
-			codeText = codeText.split("\\\'").join("\a2\a");
+			codeText = codeText.split("\\\"").join("\v1\v");
+			codeText = codeText.split("\\\'").join("\v2\v");
 			var constArray:Array = [];
 			while(codeText.length>0)
 			{
@@ -85,14 +85,14 @@ package org.flexlite.domUtils
 						break;
 				}
 			}
-			codeText = trimText.split("\a1\a").join("\\\"");
-			codeText = codeText.split("\a2\a").join("\\\'");
+			codeText = trimText.split("\v1\v").join("\\\"");
+			codeText = codeText.split("\v2\v").join("\\\'");
 			var length:int = constArray.length;
 			for(var i:int=0;i<length;i++)
 			{
 				var constStr:String = constArray[i];
-				constStr = constStr.split("\a1\a").join("\\\"");
-				constStr = constStr.split("\a2\a").join("\\\'");
+				constStr = constStr.split("\v1\v").join("\\\"");
+				constStr = constStr.split("\v2\v").join("\\\'");
 				constArray[i] = constStr;
 			}
 			commentLines = constArray;
