@@ -131,7 +131,7 @@ package org.flexlite.domUtils
 			return sizeStr;
 		}
 		
-		private static var htmlEntities:Array = [["<","&lt;"],[">","&gt;"],["&","&amp;"],["\"","&quot;"],["'","&apos;"]];
+		private static var htmlEntities:Array = [["&","&amp;"],["<","&lt;"],[">","&gt;"],["\"","&quot;"],["'","&apos;"]];
 		/**
 		 * 转换为HTML实体字符
 		 */		
