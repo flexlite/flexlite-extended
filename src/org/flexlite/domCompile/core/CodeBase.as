@@ -2,7 +2,7 @@ package org.flexlite.domCompile.core
 {
 	/**
 	 * 代码定义基类
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CodeBase implements ICode
 	{

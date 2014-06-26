@@ -27,7 +27,7 @@ package org.flexlite.domDisplay.codec
 	/**
 	 * DXR动画编码器
 	 * 注意：在AIR里，影片剪辑若不在显示列表，切换帧时会有残影的bug，转换前请先将MC都加到显示列表里。FP里没有这个问题。
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class DxrEncoder extends DxrDrawer
 	{

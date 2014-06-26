@@ -10,7 +10,7 @@ package org.flexlite.domUtils.loader
 	
 	/**
 	 * 文档类加载工具
-	 * @author DOM
+	 * @author dom
 	 */
 	public class RootLoader
 	{

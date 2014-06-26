@@ -3,7 +3,7 @@ package org.flexlite.domCompile.compiler
 	
 	/**
 	 * 组件数据对象
-	 * @author DOM
+	 * @author dom
 	 */
 	public class Component
 	{

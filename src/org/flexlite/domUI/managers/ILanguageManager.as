@@ -2,7 +2,7 @@ package org.flexlite.domUI.managers
 {
 	/**
 	 * 多语言管理器接口
-	 * @author DOM
+	 * @author dom
 	 */
 	public interface ILanguageManager
 	{

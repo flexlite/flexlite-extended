@@ -9,7 +9,7 @@ package org.flexlite.domUtils
 	
 	/**
 	 * 具有属性失效验证功能的事件抛出对象
-	 * @author DOM
+	 * @author dom
 	 */
 	public class InvalidteEventDispatcher extends EventDispatcher
 	{

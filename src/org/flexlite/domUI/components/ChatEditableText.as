@@ -22,7 +22,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 可编辑的聊天图文混排文本
-	 * @author DOM
+	 * @author dom
 	 */
 	public class ChatEditableText extends ChatDisplayText
 	{

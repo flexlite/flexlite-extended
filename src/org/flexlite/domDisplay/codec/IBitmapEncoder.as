@@ -5,7 +5,7 @@ package org.flexlite.domDisplay.codec
 
 	/**
 	 * 位图编解码器接口
-	 * @author DOM
+	 * @author dom
 	 */	
 	public interface IBitmapEncoder
 	{

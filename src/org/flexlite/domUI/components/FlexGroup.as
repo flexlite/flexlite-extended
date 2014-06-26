@@ -25,7 +25,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * FlexLite组件在Flex中运行的容器包装器
-	 * @author DOM
+	 * @author dom
 	 */
 	public class FlexGroup extends UIComponent implements IFocusManagerComponent,IIMESupport
 	{

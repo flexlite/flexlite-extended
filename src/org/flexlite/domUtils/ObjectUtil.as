@@ -4,7 +4,7 @@ package org.flexlite.domUtils
 
 	/**
 	 * 
-	 * @author DOM
+	 * @author dom
 	 */
 	public class ObjectUtil
 	{

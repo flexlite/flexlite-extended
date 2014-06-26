@@ -6,7 +6,7 @@ package org.flexlite.domCompile.core
 
 	/**
 	 * 类定义
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CpClass extends CodeBase
 	{

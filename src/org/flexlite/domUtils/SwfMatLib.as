@@ -7,7 +7,7 @@ package org.flexlite.domUtils
 	
 	/**
 	 * swf素材库解析工具
-	 * @author DOM
+	 * @author dom
 	 */
 	public class SwfMatLib extends EventDispatcher
 	{

@@ -11,7 +11,7 @@ package org.flexlite.domDisplay.image
 	
 	/**
 	 * PNG位图编码器
-	 * @author DOM
+	 * @author dom
 	 */
 	public class PngEncoder implements IBitmapEncoder
 	{

@@ -6,7 +6,7 @@ package org.flexlite.domUtils.loader
 	[ExcludeClass]
 	/**
 	 * 在Mac下加载本地文件时，转换路径为url的工具类。
-	 * @author DOM
+	 * @author dom
 	 */
 	public class PathHelper
 	{

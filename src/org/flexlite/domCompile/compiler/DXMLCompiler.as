@@ -15,7 +15,7 @@ package org.flexlite.domCompile.compiler
 	
 	/**
 	 * DXML文件编译器 
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class DXMLCompiler
 	{
@@ -1035,7 +1035,7 @@ import org.flexlite.domCompile.core.ICode;
 
 /**
  * 状态类代码块
- * @author DOM
+ * @author dom
  */
 class CpState extends CodeBase
 {
@@ -1096,7 +1096,7 @@ class CpState extends CodeBase
 
 /**
  * AddItems类代码块
- * @author DOM
+ * @author dom
  */
 class CpAddItems extends CodeBase
 {
@@ -1142,7 +1142,7 @@ class CpAddItems extends CodeBase
 }
 /**
  * SetProperty类代码块
- * @author DOM
+ * @author dom
  */
 class CpSetProperty extends CodeBase
 {

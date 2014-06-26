@@ -6,7 +6,7 @@ package org.flexlite.domDll.resolvers
 	
 	/**
 	 * JSON文件加载器
-	 * @author DOM
+	 * @author dom
 	 */
 	public class JsonResolver extends BinResolver
 	{

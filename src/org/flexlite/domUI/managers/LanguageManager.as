@@ -5,7 +5,7 @@ package org.flexlite.domUI.managers
 	
 	/**
 	 * 多语言管理器,初始化完成后调用DomGlobals.setLanguageManager()注入实例，即可调用UIComponent.tr()实现全局多语言翻译
-	 * @author DOM
+	 * @author dom
 	 */
 	public class LanguageManager extends EventDispatcher implements ILanguageManager
 	{

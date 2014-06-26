@@ -9,7 +9,7 @@ package org.flexlite.domUtils
 
 	/**
 	 * 常用文件操作方法工具类
-	 * @author DOM
+	 * @author dom
 	 */
 	public class FileUtil
 	{

@@ -5,7 +5,7 @@ package org.flexlite.domUtils
 	
 	/**
 	 * 64位无符号整数
-	 * @author DOM
+	 * @author dom
 	 */
 	public class Uint64
 	{

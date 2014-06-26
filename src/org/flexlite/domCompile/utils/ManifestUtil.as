@@ -7,7 +7,7 @@ package org.flexlite.domCompile.utils
 	
 	/**
 	 * 框架清单文件生成工具
-	 * @author DOM
+	 * @author dom
 	 */
 	public class ManifestUtil
 	{

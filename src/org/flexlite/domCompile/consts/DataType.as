@@ -2,7 +2,7 @@ package org.flexlite.domCompile.consts
 {
 	/**
 	 * 数据类型
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class DataType
 	{

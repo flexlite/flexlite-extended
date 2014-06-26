@@ -36,7 +36,7 @@ package org.flexlite.domUtils
 	
 	/**
 	 * SWF文件操作工具类
-	 * @author DOM
+	 * @author dom
 	 */
 	public class SwfUtil
 	{

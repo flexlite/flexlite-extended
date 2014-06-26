@@ -3,7 +3,7 @@ package org.flexlite.domCompile.compiler
 	
 	/**
 	 * DXML配置管理器接口
-	 * @author DOM
+	 * @author dom
 	 */
 	public interface IDXMLConfig
 	{

@@ -6,7 +6,7 @@ package org.flexlite.domCompile.core
 
 	/**
 	 * 函数定义
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CpFunction extends CodeBase
 	{

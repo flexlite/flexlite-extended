@@ -4,7 +4,7 @@ package org.flexlite.domCompile.core
 
 	/**
 	 * 代码块
-	 * @author DOM
+	 * @author dom
 	 */
 	public class CpCodeBlock extends CodeBase
 	{

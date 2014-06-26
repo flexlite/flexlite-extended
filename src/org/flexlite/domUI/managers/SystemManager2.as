@@ -21,7 +21,7 @@ package org.flexlite.domUI.managers
 	
 	/**
 	 * 可以多个实例共存的系统管理器
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class SystemManager2 extends Group implements ISystemManager
 	{

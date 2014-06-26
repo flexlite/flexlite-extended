@@ -7,7 +7,7 @@ package org.flexlite.domCompile.compiler
 	
 	/**
 	 * DXML配置管理器
-	 * @author DOM
+	 * @author dom
 	 */
 	public class DXMLConfig extends InvalidteEventDispatcher implements IDXMLConfig
 	{

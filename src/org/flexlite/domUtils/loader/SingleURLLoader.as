@@ -11,7 +11,7 @@ package org.flexlite.domUtils.loader
 
 	/**
 	 * 对单个URLLoader类加载过程的封装
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class SingleURLLoader
 	{

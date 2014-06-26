@@ -14,7 +14,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 影片剪辑按钮控件,可以直接使用三帧的影片剪辑作为皮肤，第一帧：up，第二帧：over，第三帧：down。
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class McButton extends Button
 	{

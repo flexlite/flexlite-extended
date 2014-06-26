@@ -6,7 +6,7 @@ package org.flexlite.domCompile.core
 
 	/**
 	 * 变量定义
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CpVariable extends CodeBase
 	{

@@ -2,7 +2,7 @@ package org.flexlite.domCompile.consts
 {
 	/**
 	 * 关键字常量
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class KeyWords
 	{

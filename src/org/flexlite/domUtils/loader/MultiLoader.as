@@ -11,7 +11,7 @@ package org.flexlite.domUtils.loader
 
 	/**
 	 * 对多个Loader类队列加载过程的封装
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class MultiLoader
 	{

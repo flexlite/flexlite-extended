@@ -15,7 +15,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 微调控制器
-	 * @author DOM
+	 * @author dom
 	 */
 	public class Spinner extends Range
 	{

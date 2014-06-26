@@ -2,7 +2,7 @@ package org.flexlite.domCompile.core
 {
 	/**
 	 * 注释
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CpNotation extends CodeBase
 	{

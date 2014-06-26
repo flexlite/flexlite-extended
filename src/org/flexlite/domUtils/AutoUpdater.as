@@ -15,7 +15,7 @@ package org.flexlite.domUtils
 	[Event(name="updating", type="flash.events.Event")]
 	/**
 	 * AIR自动更新工具类
-	 * @author DOM
+	 * @author dom
 	 */
 	public class AutoUpdater extends EventDispatcher
 	{

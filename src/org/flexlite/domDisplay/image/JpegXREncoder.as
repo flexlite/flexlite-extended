@@ -8,7 +8,7 @@ package org.flexlite.domDisplay.image
 	
 	/**
 	 * JPEG-XR位图编码器，需要Flash Player11.3及以上版本支持
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class JpegXREncoder implements IBitmapEncoder
 	{

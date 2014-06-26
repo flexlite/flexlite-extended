@@ -2,7 +2,7 @@ package org.flexlite.domCore
 {
 	/**
 	 * DXML相关常量声明类
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class DXML
 	{

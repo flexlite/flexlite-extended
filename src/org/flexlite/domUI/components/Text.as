@@ -29,7 +29,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 一行或多行不可编辑的文本控件,基于FTE。
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class Text extends UIComponent implements IDisplayText
 	{

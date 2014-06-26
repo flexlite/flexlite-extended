@@ -4,7 +4,7 @@ package org.flexlite.domUtils
 	
 	/**
 	 * 本地缓存工具类 
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class SharedObjectUtil
 	{

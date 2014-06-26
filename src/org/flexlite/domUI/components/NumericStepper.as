@@ -14,7 +14,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 数字调节器
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class NumericStepper extends Spinner 
 	{

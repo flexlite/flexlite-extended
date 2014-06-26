@@ -7,7 +7,7 @@ package org.flexlite.domDisplay.utils
 	
 	/**
 	 * Dxr素材库解析工具
-	 * @author DOM
+	 * @author dom
 	 */
 	public class DxrMatLib extends EventDispatcher
 	{

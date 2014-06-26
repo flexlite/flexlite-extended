@@ -2,7 +2,7 @@ package org.flexlite.domUtils
 {
 	/**
 	 * 字符串工具类
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class StringUtil
 	{

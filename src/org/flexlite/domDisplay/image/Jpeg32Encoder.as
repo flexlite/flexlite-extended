@@ -13,7 +13,7 @@ package org.flexlite.domDisplay.image
 	
 	/**
 	 * JPEG32位图编码器,由于AIR3.4的JPEG编码器有色差的bug，暂时使用此编码器替代库里的对应编码器。
-	 * @author DOM
+	 * @author dom
 	 */
 	public class Jpeg32Encoder implements IBitmapEncoder
 	{

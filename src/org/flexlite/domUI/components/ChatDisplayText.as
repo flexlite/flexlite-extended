@@ -24,7 +24,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 聊天图文混排文本
-	 * @author DOM
+	 * @author dom
 	 */
 	public class ChatDisplayText extends UIComponent
 	{

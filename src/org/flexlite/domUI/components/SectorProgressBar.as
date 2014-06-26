@@ -12,7 +12,7 @@ package org.flexlite.domUI.components
 	
 	/**
 	 * 扇形进度条
-	 * @author DOM
+	 * @author dom
 	 */
 	public class SectorProgressBar extends Range
 	{

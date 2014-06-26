@@ -12,7 +12,7 @@ package org.flexlite.domUtils
 
 	/**
 	 * 调用各种数据请求功能的入口类
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class DomLoader
 	{

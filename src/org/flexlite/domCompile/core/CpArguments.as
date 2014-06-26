@@ -2,7 +2,7 @@ package org.flexlite.domCompile.core
 {
 	/**
 	 * 参数定义
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class CpArguments extends CodeBase
 	{

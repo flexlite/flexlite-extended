@@ -2,7 +2,7 @@ package org.flexlite.domCompile.consts
 {
 	/**
 	 * 修饰符常量
-	 * @author DOM
+	 * @author dom
 	 */	
 	public class Modifiers
 	{

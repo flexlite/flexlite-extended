@@ -2,7 +2,7 @@ package org.flexlite.domCompile.core
 {
 	/**
 	 * 
-	 * @author DOM
+	 * @author dom
 	 */	
 	public interface ICode
 	{

@@ -5,7 +5,7 @@ package org.flexlite.domDisplay.utils
 	
 	/**
 	 * 批量解码DxrFile列表中所有dxrData的工具类
-	 * @author DOM
+	 * @author dom
 	 */
 	public class DxrMultiDecoder
 	{

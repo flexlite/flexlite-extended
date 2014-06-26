@@ -13,7 +13,7 @@ package org.flexlite.domDisplay.utils
 	
 	/**
 	 * DXR工具类
-	 * @author DOM
+	 * @author dom
 	 */
 	public class DxrUtil
 	{
